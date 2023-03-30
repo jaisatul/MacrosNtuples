@@ -133,6 +133,36 @@ for( unsigned int i = 0; i < (_jetPt).size(); i++){
 }
 return true;
 '''
+
+stringToPrintPrefiringMuon = '''
+for( unsigned int i = 0; i < (probe_Pt).size(); i++){
+    // Reco muon matches an L1 muon in bx -1, 10 < pT <= 21
+    bool prefired = (probe_Pt[i]>8 && probe_Pt[i]<25 && probe_L1Pt_Bxmin1[i]>10 && probe_L1Pt_Bxmin1[i]<=21 && probe_L1Qual[i]>=12);
+
+    bool unprefirable = (Flag_IsUnprefirable || (passL1_Initial_bx0[473]&&_runNb>=361468));
+    bool prefired_mu22 = probe_L1Pt_Bxmin1[i]>=22;
+
+
+    if((prefired == true) || (unprefirable && prefired_mu22)){
+        cout << "run, lumi, event number: " << _runNb << ", " << _lumiBlock << ", " << _eventNb << endl;
+        cout << "Muon pT, eta, phi: " << probe_Pt[i] << ", " << probe_Eta[i] << ", " << probe_Phi[i] <<endl;
+        cout << "L1 pT, eta, phi: " << probe_L1Pt_Bxmin1[i] << ", " << probe_L1Eta_Bxmin1[i] << ", " << probe_L1Phi_Bxmin1[i] <<endl;
+        cout << "probe pt size: " << (probe_Pt).size() << endl;
+        //cout << "bunch crossing, quality: " << _bx << ", " << probe_L1Qual[i] << endl;
+    }
+}
+return true;
+'''
+
+stringToPrintPrefiringMuon22 = '''
+    // Muon L1 with pT >= 22 GeV for unprefirable events
+    // unprefirable events:
+for ( unsinged int i = 0; i < (probe_Pt).size(); i++){
+    bool unprefirable = (Flag_IsUnprefirable || (passL1_Initial_bx0[473]&&_runNb>=361468);
+    if 
+}
+return true;
+'''
 def SinglePhotonSelection(df):
     '''
     Select events with exactly one photon with pT>20 GeV.
@@ -349,20 +379,26 @@ def ZMuMu_Plots(df, suffix = ''):
             df_mu[i] = df_mu[i].Define('probe_idxL1jet_Bxmin1','FindL1MuIdx_setBx(_L1mu_eta, _L1mu_phi, _L1mu_bx, probe_Eta, probe_Phi, probe_Pt, _L1mu_charge, -1, _L1mu_Qual, 12)')
             df_mu[i] = df_mu[i].Define('probe_idxL1jet_Bxplus1','FindL1MuIdx_setBx(_L1mu_eta, _L1mu_phi, _L1mu_bx, probe_Eta, probe_Phi, probe_Pt, _L1mu_charge, 1, _L1mu_Qual, 12)')
 
-            
-
         df_mu[i] = df_mu[i].Define('probe_L1Pt','GetVal(probe_idxL1jet, _L1mu_pt)')
         df_mu[i] = df_mu[i].Define('probe_L1Bx','GetVal(probe_idxL1jet, _L1mu_bx)')
         df_mu[i] = df_mu[i].Define('probe_L1Qual','GetVal(probe_idxL1jet, _L1mu_Qual)')
+        df_mu[i] = df_mu[i].Define('probe_L1Eta','GetVal(probe_idxL1jet, _L1mu_eta)')
+        df_mu[i] = df_mu[i].Define('probe_L1Phi','GetVal(probe_idxL1jet, _L1mu_phi)')
 
         df_mu[i] = df_mu[i].Define('probe_L1Pt_Bx0', 'GetVal(probe_idxL1jet_Bx0, _L1mu_pt)')
         df_mu[i] = df_mu[i].Define('probe_L1Qual_Bx0', 'GetVal(probe_idxL1jet_Bx0, _L1mu_Qual)')
+        df_mu[i] = df_mu[i].Define('probe_L1Eta_Bx0','GetVal(probe_idxL1jet_Bx0, _L1mu_eta)')
+        df_mu[i] = df_mu[i].Define('probe_L1Phi_Bx0','GetVal(probe_idxL1jet_Bx0, _L1mu_phi)')
 
         df_mu[i] = df_mu[i].Define('probe_L1Pt_Bxmin1', 'GetVal(probe_idxL1jet_Bxmin1, _L1mu_pt)')
         df_mu[i] = df_mu[i].Define('probe_L1Qual_Bxmin1', 'GetVal(probe_idxL1jet_Bxmin1, _L1mu_Qual)')
+        df_mu[i] = df_mu[i].Define('probe_L1Eta_Bxmin1','GetVal(probe_idxL1jet_Bxmin1, _L1mu_eta)')
+        df_mu[i] = df_mu[i].Define('probe_L1Phi_Bxmin1','GetVal(probe_idxL1jet_Bxmin1, _L1mu_phi)')
 
         df_mu[i] = df_mu[i].Define('probe_L1Pt_Bxplus1', 'GetVal(probe_idxL1jet_Bxplus1, _L1mu_pt)')
         df_mu[i] = df_mu[i].Define('probe_L1Qual_Bxplus1', 'GetVal(probe_idxL1jet_Bxplus1, _L1mu_Qual)')
+        df_mu[i] = df_mu[i].Define('probe_L1Eta_Bxplus1','GetVal(probe_idxL1jet_Bxplus1, _L1mu_eta)')
+        df_mu[i] = df_mu[i].Define('probe_L1Phi_Bxplus1','GetVal(probe_idxL1jet_Bxplus1, _L1mu_phi)')
 
         df_mu[i] = df_mu[i].Define('probe_L1PtoverRecoPt','probe_L1Pt/probe_Pt')
         
@@ -392,7 +428,10 @@ def ZMuMu_Plots(df, suffix = ''):
             df_mu[i] = df_mu[i].Define('probeL1Mu10to21Bx0_Phi', 'probe_Phi[probe_Pt>8&&probe_Pt<25&&probe_L1Pt_Bx0>10&&probe_L1Pt_Bx0<=21&&probe_L1Qual>=12]')
             df_mu[i] = df_mu[i].Define('probeL1Mu10to21Bxplus1_Eta', 'probe_Eta[probe_Pt>8&&probe_Pt<25&&probe_L1Pt_Bxplus1>10&&probe_L1Pt_Bxplus1<=21&&probe_L1Qual>=12]')
             df_mu[i] = df_mu[i].Define('probeL1Mu10to21Bxplus1_Phi', 'probe_Phi[probe_Pt>8&&probe_Pt<25&&probe_L1Pt_Bxplus1>10&&probe_L1Pt_Bxplus1<=21&&probe_L1Qual>=12]')
-            
+
+            # Some printing
+            df_mu[i] = df_mu[i].Filter(stringToPrintPrefiringMuon)
+
             df_mu[i] = df_mu[i].Define('probeL1Mu22Bxmin1_Eta', 'probe_Eta[probe_Pt>20&&probe_L1Pt_Bxmin1>22&&probe_L1Qual>=12]')
             df_mu[i] = df_mu[i].Define('probeL1Mu22Bxmin1_Phi', 'probe_Phi[probe_Pt>20&&probe_L1Pt_Bxmin1>22&&probe_L1Qual>=12]')
             df_mu[i] = df_mu[i].Define('probeL1Mu22Bx0_Eta', 'probe_Eta[probe_Pt>20&&probe_L1Pt_Bx0>22&&probe_L1Qual>=12]')
@@ -505,7 +544,7 @@ def EtSum(df, suffix = ''):
     histos['L1_HTT360er'+suffix] = df.Filter('passL1_Initial_bx0[404]').Filter('_met<50').Histo1D(ROOT.RDF.TH1DModel('h_HT_L1_HTT360er'+suffix, '', len(ht_bins)-1, array('d',ht_bins)), 'HT')
     histos['HLT_PFHT1050'+suffix] =  df.Filter('HLT_PFHT1050').Filter('_met<50').Histo1D(ROOT.RDF.TH1DModel('h_HLT_PFHT1050'+suffix, '', len(ht_bins)-1, array('d',ht_bins)), 'HT')
 
-    # DiJet selections:
+    # DiJet selections:
 
     # DiJet 80 40
     histos['h_MetNoMu_Denominator_DiJet80_40_Mjj500'+suffix] = df.Filter('hastwocleanjets').Histo1D(ROOT.RDF.TH1DModel('h_MetNoMu_Denominator_DiJet80_40_Mjj500'+suffix, '', len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'MetNoMu') 
@@ -516,7 +555,7 @@ def EtSum(df, suffix = ''):
     histos['h_MetNoMu_Denominator_DiJet80_40_Mjj500_central'+suffix] = df.Filter('hastwocentraljets').Histo1D(ROOT.RDF.TH1DModel('h_MetNoMu_Denominator_DiJet80_40_Mjj500_central'+suffix, '', len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'MetNoMu') 
     histos['HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_DiJet80_40_Mjj500_central'+suffix] = df.Filter('HLT_PFMETNoMu120_PFMHTNoMu120_IDTight&&hastwocentraljets').Histo1D(ROOT.RDF.TH1DModel('h_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_DiJet80_40_Mjj500_central'+suffix, '', len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'MetNoMu')
 
-    # HF dijets
+    # HF dijets
     histos['h_MetNoMu_Denominator_DiJet80_40_Mjj500_HF'+suffix] = df.Filter('hastwoHFjets').Histo1D(ROOT.RDF.TH1DModel('h_MetNoMu_Denominator_DiJet80_40_Mjj500_HF'+suffix, '', len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'MetNoMu') 
     histos['HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_DiJet80_40_Mjj500_HF'+suffix] = df.Filter('HLT_PFMETNoMu120_PFMHTNoMu120_IDTight&&hastwoHFjets').Histo1D(ROOT.RDF.TH1DModel('h_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_DiJet80_40_Mjj500_HF'+suffix, '', len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'MetNoMu')
 
