@@ -48,10 +48,12 @@ def main():
             inputFile = '/pnfs/iihe/cms/ph/sc4/store/data/Run2023C/EGamma0/NANOAOD/PromptNanoAODv11p9_v1-v1/70000/3b1e99a5-71a0-46ee-b720-b79669f60029.root'
         elif args.channel == 'MuonJet':
             #inputFile = '/user/lathomas/Public/L1Studies/MuJet.root'
-            inputFile = '/pnfs/iihe/cms/ph/sc4/store/data/Run2023C/Muon1/NANOAOD/PromptNanoAODv11p9_v1-v1/60000/37c190ac-242c-47d7-a98f-9c51b111ff00.root'
+            #inputFile = '/pnfs/iihe/cms/ph/sc4/store/data/Run2023C/Muon1/NANOAOD/PromptNanoAODv11p9_v1-v1/60000/37c190ac-242c-47d7-a98f-9c51b111ff00.root'
+            inputFile = '/pnfs/iihe/cms/ph/sc4/store/data/Run2023C/Muon1/NANOAOD/PromptNanoAODv12_v2-v2/60000/ee7372a9-da2d-4b3e-8a0e-3cba6d2272a5.root'
         elif args.channel == 'ZToMuMu':
             #inputFile = '/user/lathomas/Public/L1Studies/ZToMuMu.root'
-            inputFile = '/pnfs/iihe/cms/ph/sc4/store/data/Run2023C/Muon1/NANOAOD/PromptNanoAODv11p9_v1-v1/60000/37c190ac-242c-47d7-a98f-9c51b111ff00.root'
+            #inputFile = '/pnfs/iihe/cms/ph/sc4/store/data/Run2023C/Muon1/NANOAOD/PromptNanoAODv11p9_v1-v1/60000/37c190ac-242c-47d7-a98f-9c51b111ff00.root'
+            inputFile = '/pnfs/iihe/cms/ph/sc4/store/data/Run2023C/Muon1/NANOAOD/PromptNanoAODv12_v2-v2/60000/ee7372a9-da2d-4b3e-8a0e-3cba6d2272a5.root'
         elif args.channel == 'ZToEE':
             #inputFile = '/user/lathomas/Public/L1Studies/ZToEE.root'
             inputFile = '/pnfs/iihe/cms/ph/sc4/store/data/Run2023C/EGamma0/NANOAOD/PromptNanoAODv11p9_v1-v1/70000/3b1e99a5-71a0-46ee-b720-b79669f60029.root'
@@ -90,11 +92,16 @@ def main():
     ###
 
     df = ROOT.RDataFrame('Events', inputFile)
+
     if fltr != '':
         df = df.Filter(fltr)
     nEvents = df.Count().GetValue()
 
     print('There are {} events'.format(nEvents))
+
+    if nEvents == 0:
+        print('No events, exiting.')
+        exit()
 
     #Max events to run on 
     max_events = min(nEvents, args.max_events) if args.max_events >=0 else nEvents
