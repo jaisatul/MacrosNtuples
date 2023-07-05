@@ -25,6 +25,14 @@ def main():
     else:
         toplabel="#sqrt{s} = 13.6 TeV"
 
+    # Some keyword arguments common to all figures:
+    common_kwargs = {
+            'inputFiles_list': [input_file],
+            'saveplot': True,
+            'dirname': args.dir + '/plotsL1Run3',
+            'top_label': toplabel,
+            }
+
     suffixes = ['']
     if config['PU_plots']['make_histos']:
         bins = config['PU_plots']['nvtx_bins']
@@ -32,14 +40,11 @@ def main():
 
     # NVTX distribution:
     drawplots.makedist(
-            inputFiles_list = [input_file],
-            saveplot = True,
             h1d = ['h_nvtx'],
             xtitle = 'N_{vtx}',
             ytitle = 'Events',
-            top_label = toplabel,
             plotname = 'L1Jet_FromEGamma_nvtx',
-            dirname = args.dir + '/plotsL1Run3',
+            **common_kwargs,
             )
 
     for s in suffixes:
@@ -54,9 +59,6 @@ def main():
             # comparison between eta regions
             for thr in [40., 180.]:
                 drawplots.makeeff(
-                    inputFiles_list = [input_file],
-                    saveplot = True,
-                    dirname = args.dir + '/plotsL1Run3',
                     nvtx_suffix = s,
                     den = ['h_Jet_plots_{}'.format(eta_range) for eta_range in eta_ranges],
                     num = ['h_Jet_plots_{}_l1thrgeq{}'.format(eta_range, thr).replace(".", "p") for eta_range in eta_ranges],
@@ -66,14 +68,11 @@ def main():
                     #axisranges = [0, 500],
                     extralabel = "#splitline{{#geq 1 tight #mu (p_{{T}} > 25 GeV), pass HLT_IsoMu24, p_{{T}}^{{jet}} > 30 GeV}}{{p_{{T}}^{{L1 jet}} #geq {} GeV}}".format(thr), 
                     setlogx = True,
-                    top_label = toplabel,
                     plotname = 'L1Jet{}_FromEGamma_TurnOn_EtaComparison'.format(thr).replace(".", "p") ,
+                    **common_kwargs,
                     )
 
                 drawplots.makeeff(
-                    inputFiles_list = [input_file],
-                    saveplot = True,
-                    dirname = args.dir + '/plotsL1Run3',
                     nvtx_suffix = s,
                     den = ['h_Jet_plots_{}'.format(eta_range) for eta_range in eta_ranges],
                     num = ['h_Jet_plots_{}_l1thrgeq{}'.format(eta_range, thr).replace(".", "p") for eta_range in eta_ranges],
@@ -83,8 +82,8 @@ def main():
                     axisranges = [0, 300],
                     extralabel = "#splitline{{#geq 1 tight #mu (p_{{T}} > 25 GeV), pass HLT_IsoMu24, p_{{T}}^{{jet}} > 30 GeV}}{{p_{{T}}^{{L1 jet}} #geq {} GeV}}".format(thr), 
                     #setlogx = True,
-                    top_label = toplabel,
                     plotname = 'L1Jet{}_FromEGamma_TurnOn_EtaComparison_Zoom'.format(thr).replace(".", "p") ,
+                    **common_kwargs,
                     )
 
         for r in config['Regions']:
@@ -96,9 +95,6 @@ def main():
 
                 # Efficiency vs Run Number
                 drawplots.makeeff(
-                    inputFiles_list = [input_file],
-                    saveplot = True,
-                    dirname = args.dir + '/plotsL1Run3',
                     nvtx_suffix = s,
                     den = ['h_PlateauEffVsRunNb_Denominator_Jet_plots_{}'.format(eta_range)],
                     num = ['h_PlateauEffVsRunNb_Numerator_Jet_plots_{}'.format(eta_range)],
@@ -106,8 +102,8 @@ def main():
                     ytitle = 'Efficiency',
                     legendlabels = [],
                     extralabel = "#splitline{{#geq 1 tight #mu (p_{{T}} > 25 GeV), pass HLT_IsoMu24, p_{{T}}^{{jet}} > 30 GeV}}{}".format(eta_label),
-                    top_label = toplabel,
                     plotname = "L1Jet_FromEGamma_EffVsRunNb_{}".format(r),
+                    **common_kwargs,
                     )
 
             if config['TurnOns']:
@@ -115,9 +111,6 @@ def main():
                 # Efficiency vs pT
                 # all eta ranges and all qualities
                 drawplots.makeeff(
-                    inputFiles_list = [input_file],
-                    saveplot = True,
-                    dirname = args.dir + '/plotsL1Run3',
                     nvtx_suffix = s,
                     den = ['h_Jet_plots_{}'.format(eta_range)],
                     num = ['h_Jet_plots_{}_l1thrgeq{}'.format(eta_range, thr).replace(".", "p") for thr in  config['Thresholds']],
@@ -127,15 +120,12 @@ def main():
                     #axisranges = [0, 500],
                     extralabel = "#splitline{{#geq 1 tight #mu (p_{{T}} > 25 GeV), pass HLT_IsoMu24, p_{{T}}^{{jet}} > 30 GeV}}{}".format(eta_label), 
                     setlogx = True,
-                    top_label = toplabel,
                     plotname = 'L1Jet_FromEGamma_TurnOn_{}'.format(r) ,
+                    **common_kwargs,
                     )
 
                 # same thing, zoom on the 0 - 50 GeV region in pT
                 drawplots.makeeff(
-                    inputFiles_list = [input_file],
-                    saveplot = True,
-                    dirname = args.dir + '/plotsL1Run3',
                     nvtx_suffix = s,
                     den = ['h_Jet_plots_{}'.format(eta_range)],
                     num = ['h_Jet_plots_{}_l1thrgeq{}'.format(eta_range, thr).replace(".", "p") for thr in  config['Thresholds']],
@@ -145,8 +135,8 @@ def main():
                     axisranges = [0, 300],
                     extralabel = "#splitline{{#geq 1 tight #mu (p_{{T}} > 25 GeV), pass HLT_IsoMu24, p_{{T}}^{{jet}} > 30 GeV}}{}".format(eta_label), 
                     #setlogx = True,
-                    top_label = toplabel,
                     plotname = 'L1Jet_FromEGamma_TurnOn_{}_Zoom'.format(r) ,
+                    **common_kwargs,
                     )
 
                 # Comparisons between bins of PU:
@@ -154,9 +144,6 @@ def main():
                     bins = config['PU_plots']['nvtx_bins']
                     for thr in config['PU_plots']['draw_thresholds']:
                         drawplots.makeeff(
-                            inputFiles_list = [input_file],
-                            saveplot = True,
-                            dirname = args.dir + '/plotsL1Run3',
                             den = ['h_Jet_plots_{}{}'.format(eta_range, suf) for suf in suffixes[1:]],
                             num = ['h_Jet_plots_{}_l1thrgeq{}{}'.format(eta_range, thr, suf).replace(".", "p") for suf in suffixes[1:]],
                             xtitle = 'p_{T}^{jet}(reco) (GeV)',
@@ -165,16 +152,13 @@ def main():
                             #axisranges = [3, 300],
                             extralabel = "#splitline{{#geq 1 tight #mu (p_{{T}} > 25 GeV), pass HLT_IsoMu24, p_{{T}}^{{jet}} > 30 GeV}}{}".format(eta_label), 
                             setlogx = True,
-                            top_label = toplabel,
                             plotname = 'L1Jet{}_FromEGamma_TurnOn_{}_vsPU'.format(thr, r),
+                            **common_kwargs,
                             )
 
         if config['Efficiency']:
             # Efficiency vs Eta Phi
             drawplots.makeeff(
-                inputFiles_list = [input_file],
-                saveplot = True,
-                dirname = args.dir + '/plotsL1Run3',
                 nvtx_suffix = s,
                 num = ['h_L1Jet100vsEtaPhi_Numerator'],
                 den = ['h_L1Jet100vsEtaPhi_EtaRestricted'],
@@ -183,18 +167,15 @@ def main():
                 ztitle = 'L1Jet50 efficiency',
                 legendlabels = [''],
                 extralabel = '#splitline{#geq 1 tight #mu (p_{T} > 25 GeV), pass HLT_IsoMu24}{p_{T}^{jet} > 30 GeV}',
-                top_label = toplabel,
                 plotname = 'L1Jet_FromEGamma_EffVsEtaPhi',
                 axisranges = [-5, 5, -3.1416, 3.1416, 0, 1.1],
+                **common_kwargs,
                 )
 
         if config['Prefiring']:
 
             # Postfiring vs Eta Phi
             drawplots.makeeff(
-                inputFiles_list = [input_file],
-                saveplot = True,
-                dirname = args.dir + '/plotsL1Run3',
                 nvtx_suffix = s,
                 num = ['L1Jet100to150_bxplus1_etaphi'],
                 den = ['L1Jet100to150_bx0_etaphi'],
@@ -203,17 +184,14 @@ def main():
                 ztitle = 'bx+1 / (bx0 or bx+1)',
                 legendlabels = [''],
                 extralabel = '#splitline{#geq 1 tight #mu (p_{T} > 25 GeV), pass HLT_IsoMu24}{p_{T}^{jet} > 30 GeV}',
-                top_label = toplabel,
                 plotname = 'L1Jet_FromEGamma_PostfiringVsEtaPhi',
                 axisranges = [-5, 5, -3.1416, 3.1416, 0, 1.1],
                 addnumtoden = True,
+                **common_kwargs,
                 )
 
             # Prefiring vs Eta Phi
             drawplots.makeeff(
-                inputFiles_list = [input_file],
-                saveplot = True,
-                dirname = args.dir + '/plotsL1Run3',
                 nvtx_suffix = s,
                 num = ['L1Jet100to150_bxmin1_etaphi'],
                 den = ['L1Jet100to150_bx0_etaphi'],
@@ -222,17 +200,14 @@ def main():
                 ztitle = 'bx-1 / (bx0 or bx-1)',
                 legendlabels = [''],
                 extralabel = '#splitline{#geq 1 tight #mu (p_{T} > 25 GeV), pass HLT_IsoMu24}{p_{T}^{jet} > 30 GeV}',
-                top_label = toplabel,
                 plotname = 'L1Jet_FromEGamma_PrefiringVsEtaPhi',
                 axisranges = [-5, 5, -3.1416, 3.1416, 0, 1.1],
                 addnumtoden = True,
+                **common_kwargs,
                 )
 
             # Postfiring vs Eta 
             drawplots.makeeff(
-                inputFiles_list = [input_file],
-                saveplot = True,
-                dirname = args.dir + '/plotsL1Run3',
                 nvtx_suffix = s,
                 num = ['L1Jet100to150_bxplus1_eta'],
                 den = ['L1Jet100to150_bx0_eta'],
@@ -240,17 +215,14 @@ def main():
                 ytitle = 'bx+1 / (bx0 or bx+1)',
                 legendlabels = [''],
                 extralabel = '#splitline{#geq 1 tight #mu (p_{T} > 25 GeV), pass HLT_IsoMu24}{p_{T}^{jet} > 30 GeV}',
-                top_label = toplabel,
                 plotname = 'L1Jet_FromEGamma_PostfiringVsEta',
                 axisranges = [-5, 5, 0, 0.1],
                 addnumtoden = True,
+                **common_kwargs,
                 )
 
             # Prefiring vs Eta 
             drawplots.makeeff(
-                inputFiles_list = [input_file],
-                saveplot = True,
-                dirname = args.dir + '/plotsL1Run3',
                 nvtx_suffix = s,
                 num = ['L1Jet100to150_bxmin1_eta'],
                 den = ['L1Jet100to150_bx0_eta'],
@@ -258,10 +230,10 @@ def main():
                 ytitle = 'bx-1 / (bx0 or bx-1)',
                 legendlabels = [''],
                 extralabel = '#splitline{#geq 1 tight #mu (p_{T} > 25 GeV), pass HLT_IsoMu24}{p_{T}^{jet} > 30 GeV}',
-                top_label = toplabel,
                 plotname = 'L1Jet_FromEGamma_PrefiringVsEta',
                 axisranges = [-5, 5, 0, 0.1],
                 addnumtoden = True,
+                **common_kwargs,
                 )
         
 
@@ -272,9 +244,6 @@ def main():
         if config['Response']:
             # Resolution Vs Pt
             drawplots.makeresol(
-                inputFiles_list = [input_file],
-                saveplot = True,
-                dirname = args.dir + '/plotsL1Run3',
                 nvtx_suffix = s,
                 h2d = ['h_ResponseVsPt_Jet_plots_{}'.format(eta_range) for eta_range in eta_ranges],
                 xtitle = 'p_{T}^{reco jet} (GeV)',
@@ -282,16 +251,13 @@ def main():
                 #extralabel = '#splitline{Z#rightarrowee}{Non Iso.}',
                 legend_pos = 'top',
                 legendlabels = eta_labels,
-                top_label = toplabel,
                 plotname = 'L1Jet_FromEGamma_ResponseVsPt',
                 axisranges = [0, 200, 0.6, 1.5], 
+                **common_kwargs,
                 )
 
             # Resolution Vs RunNb
             drawplots.makeresol(
-                inputFiles_list = [input_file],
-                saveplot = True,
-                dirname = args.dir + '/plotsL1Run3',
                 nvtx_suffix = s,
                 h2d = ['h_ResponseVsRunNb_Jet_plots_{}'.format(eta_range) for eta_range in eta_ranges],
                 xtitle = 'run number',
@@ -299,16 +265,26 @@ def main():
                 #extralabel = '#splitline{Z#rightarrowee}{Non Iso.}',
                 legend_pos = 'top',
                 legendlabels = eta_labels,
-                top_label = toplabel,
                 plotname = 'L1Jet_FromEGamma_ResponseVsRunNb',
                 axisranges = [355374, 362760, 0.7, 1.5],
+                **common_kwargs,
+                )
+
+            drawplots.makeresol(
+                nvtx_suffix = s,
+                h2d = ['h_ResponseVsPt_big_bins_Jet_plots_{}'.format(eta_range) for eta_range in eta_ranges],
+                xtitle = 'p_{T}^{reco jet} (GeV)',
+                ytitle = '(p_{T}^{L1 jet}/p_{T}^{reco jet})',
+                #extralabel = '#splitline{Z#rightarrowee}{Non Iso.}',
+                legend_pos = 'top',
+                legendlabels = eta_labels,
+                plotname = 'L1Jet_FromEGamma_ResponseVsPt_big_bins',
+                axisranges = [0, 200, 0.6, 1.5], 
+                **common_kwargs,
                 )
 
             # Zoomed version
 #            drawplots.makeresol(
-#                inputFiles_list = [input_file],
-#                saveplot = True,
-#                dirname = args.dir + '/plotsL1Run3',
 #                nvtx_suffix = s,
 #                h2d = ['h_ResponseVsRunNb_Jet_plots_{}'.format(eta_range) for eta_range in eta_ranges],
 #                xtitle = 'run number',
@@ -316,9 +292,9 @@ def main():
 #                #extralabel = '#splitline{Z#rightarrowee}{Non Iso.}',
 #                legend_pos = 'top',
 #                legendlabels = eta_labels,
-#                top_label = toplabel,
 #                plotname = 'L1Jet_FromEGamma_ResponseVsRunNb_Zoom',
 #                axisranges = [355374, 362760, 0.8, 1.1],
+#                **common_kwargs,
 #                )
 
         # Pt Balance plots
@@ -326,33 +302,27 @@ def main():
         if config['PtBalance']:
 
             drawplots.makeprof(
-                inputFiles_list = [input_file],
-                saveplot = True,
-                dirname = args.dir + '/plotsL1Run3',
                 nvtx_suffix = s,
                 h2d = ['h_L1PtBalanceVsRunNb_{}'.format(eta_range) for eta_range in eta_ranges],
                 xtitle = 'run number',
                 ytitle = '(p_{T}^{L1 jet}/p_{T}^{reco #gamma})',
                 extralabel = "#splitline{$selection_label, PFMET<50 GeV}{p_{T}^{jet} > 30 GeV, #Delta#phi(#gamma, jet) > 2.9}",
                 legendlabels = eta_labels,
-                top_label = toplabel,
                 axisranges = [320673, 325173, 0, 1.5],
                 plotname = 'L1Jet_FromEGamma_PtBalancevsRun',
+                **common_kwargs,
                 )
 
             drawplots.makeprof(
-                inputFiles_list = [input_file],
-                saveplot = True,
-                dirname = args.dir + '/plotsL1Run3',
                 nvtx_suffix = s,
                 h2d = ['h_L1PtBalanceVsRunNb_singlejet_{}'.format(eta_range) for eta_range in eta_ranges],
                 xtitle = 'run number',
                 ytitle = '(p_{T}^{L1 jet}/p_{T}^{reco #gamma})',
                 extralabel = "#splitline{$selection_label, PFMET<50 GeV}{= 1 clean jet, p_{T}^{jet} > 30 GeV, #Delta#phi(#gamma, jet) > 2.9}",
                 legendlabels = eta_labels,
-                top_label = toplabel,
                 axisranges = [320673, 325173, 0, 1.5],
                 plotname = 'L1Jet_FromEGamma_PtBalancevsRun_singlejet',
+                **common_kwargs,
                 )
 
 if __name__ == '__main__':

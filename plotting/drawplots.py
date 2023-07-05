@@ -28,7 +28,8 @@ def main():
     parser.add_argument("--h2d", dest="h2d", help="2D histo (for profile etc)", nargs='+',type=str)
     parser.add_argument("--axisranges", dest="axisranges", help="Axis ranges [xmin, xmax, ymin, ymax, zmin, zmax]", nargs='+', type=float, default=[])
     parser.add_argument("--addnumtoden", dest="addnumtoden", help="Add numerator histo to denominator (because it only contains complementary events e.g. failing probes)",type=bool, default=False)
-    parser.add_argument("--saveplot", dest="saveplot", help="Save plots or not",type=bool, default = False)
+    parser.add_argument("--saveplot", dest="saveplot", help="Save plots in .png and .pdf format",type=bool, default = False)
+    parser.add_argument("--saveroot", dest="saveroot", help="Save plots in .root format",type=bool, default = False)
     parser.add_argument("--interactive", dest="interactive", help="Run in interactive mode (keep plot drawn)", type=bool, default=False)
     parser.add_argument("--suffix_files", dest="suffix_files", help="Input files suffix", nargs='+', type=str, default='')
     parser.add_argument("--toplabel", dest="top_label", help="Label to put on top right of plot (for sqrt(s) and lumi values)", type=str, default="")
@@ -274,6 +275,8 @@ def drawplots(objs, legendlabels, xtitle='', ytitle='', ztitle='',  extralabel='
     if saveplot: 
         c.SaveAs(dirname+nvtx_suffix+'/'+plotname+'.png')
         c.SaveAs(dirname+nvtx_suffix+'/'+plotname+'.pdf')
+    if saveroot:
+        c.SaveAs(dirname+nvtx_suffix+'/'+plotname+'.root')
     
 
 def compute_eff(hdens, hnums, addnumtoden):
