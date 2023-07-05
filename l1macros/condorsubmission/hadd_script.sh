@@ -2,6 +2,8 @@
 #for dir in `ls -d outdir/2022Run?v?`
 # For 2023 setup:
 for dir in "outdir/2023B" "outdir/2023C" "outdir/golden_2023B" "outdir/golden_2023C"
+# Re-processed 2018 and 2022:
+#for dir in "outdir/2018Nano" "outdir/golden_2018Nano" "outdir/2022Nano" "outdir/golden_2022Nano"
 do
     for skim in "ZToMuMu" "MuonJet" "ZToEE" "PhotonJet"
     do
