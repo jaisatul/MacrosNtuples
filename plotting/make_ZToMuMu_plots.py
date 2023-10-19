@@ -23,6 +23,14 @@ def main():
     else:
         toplabel="#sqrt{s} = 13.6 TeV"
 
+    # Some keyword arguments common to all figures:
+    common_kwargs = {
+            'inputFiles_list': [input_file],
+            'saveplot': True,
+            'dirname': args.dir + '/plotsL1Run3',
+            'top_label': toplabel,
+            }
+
     suffixes = ['']
     if config['PU_plots']['make_histos']:
         bins = config['PU_plots']['nvtx_bins']
@@ -30,14 +38,11 @@ def main():
 
     # NVTX distribution:
     drawplots.makedist(
-            inputFiles_list = [input_file],
-            saveplot = True,
             h1d = ['h_nvtx'],
             xtitle = 'N_{vtx}',
             ytitle = 'Events',
-            top_label = toplabel,
             plotname = 'L1Mu_nvtx',
-            dirname = args.dir + '/plotsL1Run3',
+            **common_kwargs,
             )
 
     for s in suffixes:
@@ -51,9 +56,6 @@ def main():
 
                 # Efficiency vs Run Number
                 drawplots.makeeff(
-                    inputFiles_list = [input_file],
-                    saveplot = True,
-                    dirname = args.dir + '/plotsL1Run3',
                     nvtx_suffix = s,
                     den = ['h_PlateauEffVsRunNb_Denominator_AllQual_plots_{}'.format(eta_range)],
                     num = ['h_PlateauEffVsRunNb_Numerator_{}_plots_{}'.format(qual, eta_range) for qual in config['Qualities']],
@@ -62,48 +64,38 @@ def main():
                     axisranges = [0, 1, 0.8, 1.05],
                     legendlabels = [label(qual) for qual in config['Qualities']],
                     extralabel = "#splitline{{Z#rightarrow#mu#mu, p_{{T}}^{{#mu}}(reco) #geq 27 GeV}}{}".format(eta_label),
-                    top_label = toplabel,
                     plotname = "L1Mu_EffVsRunNb_{}".format(r),
+                    **common_kwargs,
                     )
 
             for qual in config['Qualities']:
                 if config['TurnOns']:
 
+                    TurnOn_kwargs = {
+                            'nvtx_suffix': s,
+                            'den': ['h_{}_plots_{}'.format(qual, eta_range)],
+                            'num': ['h_{}_plots_{}_l1thrgeq{}'.format(qual, eta_range, thr) for thr in  config['Thresholds']],
+                            'xtitle': 'p_{T}^{#mu}(reco) (GeV)',
+                            'ytitle': 'Efficiency',
+                            'legendlabels': ['p_{{T}}^{{L1 #mu}} #geq {} GeV'.format(thr) for thr in config['Thresholds']],
+                            'extralabel': "#splitline{{Z#rightarrow#mu#mu, {}}}{}".format(label(qual), eta_label),
+                            }
+
                     # Efficiency vs pT
                     # all eta ranges and all qualities
                     drawplots.makeeff(
-                        inputFiles_list = [input_file],
-                        saveplot = True,
-                        dirname = args.dir + '/plotsL1Run3',
-                        nvtx_suffix = s,
-                        den = ['h_{}_plots_{}'.format(qual, eta_range)],
-                        num = ['h_{}_plots_{}_l1thrgeq{}'.format(qual, eta_range, thr) for thr in  config['Thresholds']],
-                        xtitle = 'p_{T}^{#mu}(reco) (GeV)',
-                        ytitle = 'Efficiency',
-                        legendlabels = ['p_{{T}}^{{L1 #mu}} #geq {} GeV'.format(thr) for thr in config['Thresholds']],
                         axisranges = [3, 1000],
-                        extralabel = "#splitline{{Z#rightarrow#mu#mu, {}}}{}".format(label(qual), eta_label),
                         setlogx = True,
-                        top_label = toplabel,
                         plotname = 'L1Mu_TurnOn{}_{}'.format(qual, r) ,
+                        **TurnOn_kwargs, **common_kwargs,
                         )
 
                     # same thing, zoom on the 0 - 50 GeV region in pT
                     drawplots.makeeff(
-                        inputFiles_list = [input_file],
-                        saveplot = True,
-                        dirname = args.dir + '/plotsL1Run3',
-                        nvtx_suffix = s,
-                        den = ['h_{}_plots_{}'.format(qual, eta_range)],
-                        num = ['h_{}_plots_{}_l1thrgeq{}'.format(qual, eta_range, thr) for thr in  config['Thresholds']],
-                        xtitle = 'p_{T}^{#mu}(reco) (GeV)',
-                        ytitle = 'Efficiency',
-                        legendlabels = ['p_{{T}}^{{L1 #mu}} #geq {} GeV'.format(thr) for thr in config['Thresholds']],
                         axisranges = [3, 50],
-                        extralabel = "#splitline{{Z#rightarrow#mu#mu, {}}}{}".format(label(qual), eta_label),
                         setlogx = True,
-                        top_label = toplabel,
                         plotname = 'L1Mu_TurnOn{}_{}_Zoom'.format(qual, r) ,
+                        **TurnOn_kwargs, **common_kwargs,
                         )
 
                     # Comparisons between bins of PU:
@@ -111,9 +103,6 @@ def main():
                         bins = config['PU_plots']['nvtx_bins']
                         for thr in config['PU_plots']['draw_thresholds']:
                             drawplots.makeeff(
-                                inputFiles_list = [input_file],
-                                saveplot = True,
-                                dirname = args.dir + '/plotsL1Run3',
                                 den = ['h_{}_plots_{}{}'.format(qual, eta_range, suf) for suf in suffixes[1:]],
                                 num = ['h_{}_plots_{}_l1thrgeq{}{}'.format(qual, eta_range, thr, suf) for suf in suffixes[1:]],
                                 xtitle = 'p_{T}^{#mu}(reco) (GeV)',
@@ -122,15 +111,12 @@ def main():
                                 axisranges = [3, 1000],
                                 extralabel = "#splitline{{Z#rightarrow#mu#mu, {}}}{}".format(label(qual), eta_label),
                                 setlogx = True,
-                                top_label = toplabel,
                                 plotname = 'L1Mu{}_TurnOn{}_{}_vsPU'.format(thr, qual, r) ,
+                                **common_kwargs,
                                 )
 
         if config['Efficiency']:
             drawplots.makeeff(
-                inputFiles_list = [input_file],
-                saveplot = True,
-                dirname = args.dir + '/plotsL1Run3',
                 nvtx_suffix = s,
                 num = ['h_Mu22_EtaPhi_Numerator'],
                 den = ['h_Mu22_EtaPhi_Denominator'],
@@ -139,169 +125,126 @@ def main():
                 ztitle = 'L1Mu22 efficiency (p_{T}^{#mu}(reco) > 27 GeV)',
                 legendlabels = [''],
                 extralabel = '#splitline{Z#rightarrow#mu#mu}{L1 Qual. #geq 12}',
-                top_label = toplabel,
                 plotname = 'L1Mu_EffVsEtaPhi',
                 axisranges = [-2.4, 2.4, -3.1416, 3.1416, 0, 1.1],
+                **common_kwargs,
                 )
 
         if config['Prefiring']:
 
+            pre_post_firing_kwargs = {
+                    'nvtx_suffix': s,
+                    'xtitle': '#eta^{#mu}(reco)',
+                    'legendlabels': [''],
+                    'extralabel': '#splitline{Z#rightarrow#mu#mu}{10 #leq p_{T}^{#mu}(L1) < 21, L1 Qual. #geq 12}',
+                    'addnumtoden': True,
+                    }
+
             # Postfiring vs Eta Phi
             drawplots.makeeff(
-                inputFiles_list = [input_file],
-                saveplot = True,
-                dirname = args.dir + '/plotsL1Run3',
-                nvtx_suffix = s,
                 num = ['L1Mu10to21_bxplus1_etaphi'],
                 den = ['L1Mu10to21_bx0_etaphi'],
-                xtitle = '#eta^{#mu}(reco)',
                 ytitle = '#phi^{#mu}(reco)',
                 ztitle = 'bx+1 / (bx0 or bx+1)',
-                legendlabels = [''],
-                extralabel = '#splitline{Z#rightarrow#mu#mu}{10 #leq p_{T}^{#mu}(L1) < 21, L1 Qual. #geq 12}',
-                top_label = toplabel,
                 plotname = 'L1Mu_PostfiringVsEtaPhi',
                 axisranges = [-2.4, 2.4, -3.1416, 3.1416, 0, 1.1],
                 addnumtoden = True,
+                **common_kwargs,
                 )
 
             # Prefiring vs Eta Phi
             drawplots.makeeff(
-                inputFiles_list = [input_file],
-                saveplot = True,
-                dirname = args.dir + '/plotsL1Run3',
-                nvtx_suffix = s,
                 num = ['L1Mu10to21_bxmin1_etaphi'],
                 den = ['L1Mu10to21_bx0_etaphi'],
-                xtitle = '#eta^{#mu}(reco)',
                 ytitle = '#phi^{#mu}(reco)',
                 ztitle = 'bx-1 / (bx0 or bx-1)',
-                legendlabels = [''],
-                extralabel = '#splitline{Z#rightarrow#mu#mu, all events}{10 #leq p_{T}^{#mu}(L1) < 21, L1 Qual. #geq 12}',
-                top_label = toplabel,
                 plotname = 'L1Mu_PrefiringVsEtaPhi',
                 axisranges = [-2.4, 2.4, -3.1416, 3.1416, 0, 1.1],
                 addnumtoden = True,
+                **common_kwargs,
                 )
         
             # Postfiring vs Eta
             drawplots.makeeff(
-                inputFiles_list = [input_file],
-                saveplot = True,
-                dirname = args.dir + '/plotsL1Run3',
-                nvtx_suffix = s,
                 num = ['L1Mu10to21_bxplus1_eta'],
                 den = ['L1Mu10to21_bx0_eta'],
-                xtitle = '#eta^{#mu}(reco)',
                 ytitle = 'bx+1 / (bx0 or bx+1)',
-                legendlabels = [''],
-                extralabel = '#splitline{Z#rightarrow#mu#mu}{10 #leq p_{T}^{#mu}(L1) < 21, L1 Qual. #geq 12}',
-                top_label = toplabel,
                 plotname = 'L1Mu_PostfiringVsEta',
                 axisranges = [-2.4, 2.4, 0, 0.1],
                 addnumtoden = True,
+                **common_kwargs,
                 )
 
             # Prefiring vs Eta
             drawplots.makeeff(
-                inputFiles_list = [input_file],
-                saveplot = True,
-                dirname = args.dir + '/plotsL1Run3',
-                nvtx_suffix = s,
                 num = ['L1Mu10to21_bxmin1_eta'],
                 den = ['L1Mu10to21_bx0_eta'],
-                xtitle = '#eta^{#mu}(reco)',
                 ytitle = 'bx-1 / (bx0 or bx-1)',
-                legendlabels = [''],
-                extralabel = '#splitline{Z#rightarrow#mu#mu, all events}{10 #leq p_{T}^{#mu}(L1) < 21, L1 Qual. #geq 12}',
-                top_label = toplabel,
                 plotname = 'L1Mu_PrefiringVsEta',
                 axisranges = [-2.4, 2.4, 0, 0.1],
                 addnumtoden = True,
+                **common_kwargs,
                 )
             
             # Same thing, for Mu 10 and 22
             # Postfiring vs Eta Phi
             for pt_thr in ['10', '22']:
+
+                pre_post_firing_kwargs = {
+                        'nvtx_suffix': s,
+                        'xtitle': '#eta^{#mu}(reco)',
+                        'legendlabels': [''],
+                        'addnumtoden': True,
+                        }
+
                 drawplots.makeeff(
-                    inputFiles_list = [input_file],
-                    saveplot = True,
-                    dirname = args.dir + '/plotsL1Run3',
-                    nvtx_suffix = s,
                     num = ['L1Mu{}_bxplus1_etaphi'.format(pt_thr)],
                     den = ['L1Mu{}_bx0_etaphi'.format(pt_thr)],
-                    xtitle = '#eta^{#mu}(reco)',
                     ytitle = '#phi^{#mu}(reco)',
                     ztitle = 'bx+1 / (bx0 or bx+1)',
-                    legendlabels = [''],
                     extralabel = '#splitline{Z#rightarrow#mu#mu}{p_{T}^{#mu}(L1) > ' + pt_thr + ', L1 Qual. #geq 12}',
-                    top_label = toplabel,
                     plotname = 'L1Mu{}_PostfiringVsEtaPhi'.format(pt_thr),
                     axisranges = [-2.4, 2.4, -3.1416, 3.1416, 0, 1.1],
-                    addnumtoden = True,
+                    **pre_post_firing_kwargs, **common_kwargs,
                     )
 
                 # Prefiring vs Eta Phi
                 drawplots.makeeff(
-                    inputFiles_list = [input_file],
-                    saveplot = True,
-                    dirname = args.dir + '/plotsL1Run3',
-                    nvtx_suffix = s,
                     #num = ['L1Mu22_FirstBunchInTrain_bxmin1_etaphi'],
                     num = ['L1Mu{}_OR_bxmin1_etaphi'.format(pt_thr)],
                     den = ['L1Mu{}_OR_bx0_etaphi'.format(pt_thr)],
-                    xtitle = '#eta^{#mu}(reco)',
                     ytitle = '#phi^{#mu}(reco)',
                     ztitle = 'bx-1 / (bx0 or bx-1)',
-                    legendlabels = [''],
                     extralabel = '#splitline{Z#rightarrow#mu#mu, unprefirable events}{p_{T}^{#mu}(L1) > ' + pt_thr + ', L1 Qual. #geq 12}',
-                    top_label = toplabel,
                     plotname = 'L1Mu{}_PrefiringVsEtaPhi'.format(pt_thr),
                     axisranges = [-2.4, 2.4, -3.1416, 3.1416, 0, 1.1],
-                    addnumtoden = True,
+                    **pre_post_firing_kwargs, **common_kwargs,
                     )
             
                 # Postfiring vs Eta
                 drawplots.makeeff(
-                    inputFiles_list = [input_file],
-                    saveplot = True,
-                    dirname = args.dir + '/plotsL1Run3',
-                    nvtx_suffix = s,
                     num = ['L1Mu{}_bxplus1_eta'.format(pt_thr)],
                     den = ['L1Mu{}_bx0_eta'.format(pt_thr)],
-                    xtitle = '#eta^{#mu}(reco)',
                     ytitle = 'bx+1 / (bx0 or bx+1)',
-                    legendlabels = [''],
                     extralabel = '#splitline{Z#rightarrow#mu#mu}{p_{T}^{#mu}(L1) > ' + pt_thr + ', L1 Qual. #geq 12}',
-                    top_label = toplabel,
                     plotname = 'L1Mu{}_PostfiringVsEta'.format(pt_thr),
                     axisranges = [-2.4, 2.4, 0, 0.1],
-                    addnumtoden = True,
+                    **pre_post_firing_kwargs, **common_kwargs,
                     )
 
                 # Prefiring vs Eta
                 drawplots.makeeff(
-                    inputFiles_list = [input_file],
-                    saveplot = True,
-                    dirname = args.dir + '/plotsL1Run3',
-                    nvtx_suffix = s,
                     #num = ['L1Mu22_FirstBunchInTrain_bxmin1_eta'],
                     num = ['L1Mu{}_OR_bxmin1_eta'.format(pt_thr)],
                     den = ['L1Mu{}_OR_bx0_eta'.format(pt_thr)],
-                    xtitle = '#eta^{#mu}(reco)',
                     ytitle = 'bx-1 / (bx0 or bx-1)',
-                    legendlabels = [''],
                     extralabel = '#splitline{Z#rightarrow#mu#mu, unprefirable events}{p_{T}^{#mu}(L1) > ' + pt_thr + ', L1 Qual. #geq 12}',
-                    top_label = toplabel,
                     plotname = 'L1Mu{}_PrefiringVsEta'.format(pt_thr),
                     axisranges = [-2.4, 2.4, 0, 0.1],
-                    addnumtoden = True,
+                    **pre_post_firing_kwargs, **common_kwargs,
                     )
 
                 drawplots.makeeff(
-                    inputFiles_list = [input_file],
-                    saveplot = True,
-                    dirname = args.dir + '/plotsL1Run3',
                     nvtx_suffix = s,
                     num = ['L1Mu{}_bx0_etaphi'.format(pt_thr)],
                     den = ['L1Mu{}_all_etaphi'.format(pt_thr)],
@@ -310,17 +253,13 @@ def main():
                     ztitle = 'bx0 / all bx',
                     legendlabels = [''],
                     extralabel = '#splitline{Z#rightarrow#mu#mu, all events}{p_{T}^{#mu}(L1) > ' + pt_thr + ', L1 Qual. #geq 12}',
-                    top_label = toplabel,
                     plotname = 'L1Mu{}_OccupancyVsEtaPhi'.format(pt_thr),
                     axisranges = [-2.4, 2.4, -3.1416, 3.1416, 0, 1.1],
-                    #addnumtoden = True,
+                    **common_kwargs,
                     )
 
             # Occupancy vs Eta Phi
             drawplots.makeeff(
-                inputFiles_list = [input_file],
-                saveplot = True,
-                dirname = args.dir + '/plotsL1Run3',
                 nvtx_suffix = s,
                 num = ['L1Mu10to21_bx0_etaphi'],
                 den = ['L1Mu10to21_all_etaphi'],
@@ -329,10 +268,10 @@ def main():
                 ztitle = 'bx0 / all bx',
                 legendlabels = [''],
                 extralabel = '#splitline{Z#rightarrow#mu#mu, all events}{10 #leq p_{T}^{#mu}(L1) < 21, L1 Qual. #geq 12}',
-                top_label = toplabel,
                 plotname = 'L1Mu10to21_OccupancyVsEtaPhi',
                 axisranges = [-2.4, 2.4, -3.1416, 3.1416, 0, 1.1],
                 #addnumtoden = True,
+                **common_kwargs,
                 )
 
 
@@ -346,34 +285,28 @@ def main():
 
             # Resolution Vs Pt
             drawplots.makeresol(
-                inputFiles_list = [input_file],
-                saveplot = True,
-                dirname = args.dir + '/plotsL1Run3',
                 nvtx_suffix = s,
                 h2d = ['h_ResponseVsPt_AllQual_plots_{}'.format(eta_range) for eta_range in eta_ranges],
                 xtitle = 'p_{T}^{reco muon} (GeV)',
                 ytitle = '(p_{T}^{L1Mu}/p_{T}^{reco muon})',
                 extralabel = '#splitline{Z#rightarrow#mu#mu}{All qual.}',
                 legendlabels = eta_labels,
-                top_label = toplabel,
                 plotname = 'L1Mu_ResponseVsPt',
                 axisranges = [0, 100, 0.8, 1.6], 
+                **common_kwargs,
                 )
 
             # Resolution Vs RunNb
             drawplots.makeresol(
-                inputFiles_list = [input_file],
-                saveplot = True,
-                dirname = args.dir + '/plotsL1Run3',
                 nvtx_suffix = s,
                 h2d = ['h_ResponseVsRunNb_AllQual_plots_{}'.format(eta_range) for eta_range in eta_ranges],
                 xtitle = 'run number',
                 ytitle = '(p_{T}^{L1Mu}/p_{T}^{reco muon})',
                 extralabel = '#splitline{Z#rightarrow#mu#mu}{All qual.}',
                 legendlabels = eta_labels,
-                top_label = toplabel,
                 plotname = 'L1Mu_ResponseVsRunNb',
                 axisranges = [355374, 362760, 0.9, 1.5],
+                **common_kwargs,
                 )
 
         if config['TurnOns'] and 'Qual12' in config['Qualities']:
@@ -386,9 +319,6 @@ def main():
             # Comparison between track finders
             for thr in [5, 22]:
                 drawplots.makeeff(
-                    inputFiles_list = [input_file],
-                    saveplot = True,
-                    dirname = args.dir + '/plotsL1Run3',
                     nvtx_suffix = s,
                     den = ['h_Qual12_plots_{}'.format(eta_range) for eta_range in eta_ranges],
                     num = ['h_Qual12_plots_{}_l1thrgeq{}'.format(eta_range, thr) for eta_range in eta_ranges],
@@ -398,14 +328,11 @@ def main():
                     axisranges = [3, 1000],
                     extralabel = "#splitline{{Z#rightarrow#mu#mu, All qual.}}{{p_{{T}}^{{L1 #mu}} #geq {} GeV}}".format(thr),
                     setlogx = True,
-                    top_label = toplabel,
                     plotname = 'L1Mu{}_TurnOnQual12_EtaComparison'.format(thr) ,
+                    **common_kwargs,
                     )
 
                 drawplots.makeeff(
-                    inputFiles_list = [input_file],
-                    saveplot = True,
-                    dirname = args.dir + '/plotsL1Run3',
                     nvtx_suffix = s,
                     den = ['h_Qual12_plots_{}'.format(eta_range) for eta_range in eta_ranges],
                     num = ['h_Qual12_plots_{}_l1thrgeq{}'.format(eta_range, thr) for eta_range in eta_ranges],
@@ -415,8 +342,8 @@ def main():
                     axisranges = [3, 50],
                     extralabel = "#splitline{{Z#rightarrow#mu#mu, All qual.}}{{p_{{T}}^{{L1 #mu}} #geq {} GeV}}".format(thr),
                     #setlogx = True,
-                    top_label = toplabel,
                     plotname = 'L1Mu{}_TurnOnQual12_EtaComparison_Zoom'.format(thr) ,
+                    **common_kwargs,
                     )
 
 def label(qual):

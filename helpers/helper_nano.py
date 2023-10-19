@@ -257,7 +257,7 @@ def ZMuMu_MuSelection(df):
 
     df = df.Filter('Sum(isTag)>0')
 
-    df = df.Define('isProbe','Muon_pt>3&&abs(Muon_pdgId)==13&&Muon_PassTightId&& (Sum(isTag)>=2|| isTag==0)')
+    df = df.Define('isProbe','Muon_pt>3&&abs(Muon_pdgId)==13&&Muon_PassTightId&& (Sum(isTag)>=2||isTag==0)')
     df = df.Define('dr_mll', 'dR_mll(Muon_pt, Muon_eta, Muon_phi, isTag, isProbe)')
 
 
@@ -281,6 +281,202 @@ def ZMuMu_MuSelection(df):
     ''')
 
     return df
+
+
+def DQMOff_EleSelection(df):
+    '''
+    Select Z->ee events passing a single electron trigger. Defines probe pt/eta/phi
+    The selections are modified w.r.t ZEE_EleSelection method.
+    This is done so to match the DQM Off selections
+    '''
+    df = df.Filter('HLT_Ele32_WPTight_Gsf')
+
+    # Trigged on a Electron (probably redondant)
+    df = df.Filter('''
+    bool trigged_on_e = false;
+    for (unsigned int i = 0; i < TrigObj_id.size(); i++){
+        if(TrigObj_id[i] == 11) trigged_on_e = true;
+    }
+    return trigged_on_e;
+    ''')
+
+    # TrigObj matching
+    df = df.Filter('nElectron > 2')
+    df = df.Define('Electron_trig_idx', 'MatchObjToTrig(Electron_eta, Electron_phi, TrigObj_pt, TrigObj_eta, TrigObj_phi, TrigObj_id, 11, TrigObj_filterBits)')
+    df = df.Define('Electron_passHLT_Ele32_WPTight_Gsf', 'trig_is_filterbit1_set(Electron_trig_idx, TrigObj_filterBits)')
+
+    df = df.Define('isTag','Electron_pt>30&&abs(Electron_pdgId)==11&&Electron_mvaNoIso_WP90&&Electron_passHLT_Ele32_WPTight_Gsf==true')
+    df = df.Filter('Sum(isTag)>0')
+
+    df = df.Define('isProbe','abs(Electron_pdgId)==11&&Electron_mvaNoIso_WP80&&(Sum(isTag)>=2||isTag==0)')
+
+    df = df.Define('dr_mll', 'dR_mll(Electron_pt, Electron_eta, Electron_phi, isTag, isProbe)')
+
+    # Filter on pairs of lepton with DeltaR > 0.5
+    df = df.Filter('''
+    for (unsigned int line = 0; line < dr_mll.size(); line++){
+        for (unsigned int col = 0; col < 2; col++){
+            float DeltaR = dr_mll[line][col][0];
+            float mll = dr_mll[line][col][1];
+            if (mll > 60 && mll < 120){
+                return true;
+            }
+        }
+    }
+    return false;
+    ''')
+
+    # df = df.Define('_mll', 'mll(Electron_pt, Electron_eta, Electron_phi, isTag, isProbe)')
+    # df = df.Filter('_mll>60&&_mll<120')
+
+    df = df.Define('probe_Pt','Electron_pt[isProbe]')
+    df = df.Define('probe_Eta','Electron_eta[isProbe]')
+    df = df.Define('probe_Phi','Electron_phi[isProbe]')
+
+    return df
+
+
+def DQMOff_MuSelection(df):
+    '''
+    Selects Z->mumu events passing a single muon trigger. Defines probe pt/eta/phi
+    The selections are modified w.r.t ZMuMu_MuSelection method.
+    This is done so to match the DQM Off selections
+    '''
+    df = df.Filter('HLT_IsoMu27')
+
+    # Trigged on a Muon (probably redondant)
+    df = df.Filter('''
+    bool trigged_on_mu = false;
+    for (unsigned int i = 0; i < TrigObj_id.size(); i++){
+        if(TrigObj_id[i] == 13) trigged_on_mu = true;
+    }
+    return trigged_on_mu;
+    ''')
+
+    # TrigObj matching
+    df = df.Define('Muon_trig_idx', 'MatchObjToTrig_DQMOff(Muon_eta, Muon_phi, TrigObj_pt, TrigObj_eta, TrigObj_phi, TrigObj_id, 13, TrigObj_filterBits)')
+    df = df.Define('Muon_passHLT_IsoMu27', 'trig_is_filterbit1_set(Muon_trig_idx, TrigObj_filterBits)')
+    df = df.Define('Muon_PassTightId','Muon_tightId') 
+
+    df = df.Define('isTag','Muon_pt>26&&abs(Muon_pdgId)==13&&Muon_PassTightId&&Muon_passHLT_IsoMu27')
+    df = df.Filter('Sum(isTag)>0')
+
+    df = df.Define('isProbe','abs(Muon_pdgId)==13&&Muon_PassTightId&& (Sum(isTag)>=2||isTag==0)')
+    df = df.Define('dr_mll', 'dR_mll(Muon_pt, Muon_eta, Muon_phi, isTag, isProbe)')
+
+    # Filter on pairs of lepton with DeltaR > 0.5
+    df = df.Filter('''
+    for (unsigned int line = 0; line < dr_mll.size(); line++){
+        for (unsigned int col = 0; col < 2; col++){
+            float DeltaR = dr_mll[line][col][0];
+            if (DeltaR > 0.5){
+                return true;
+            }
+        }
+    }
+    return false;
+    ''')
+
+    df = df.Define('probe_Pt','Muon_pt[isProbe]')
+    df = df.Define('probe_Eta','Muon_eta[isProbe]')
+    df = df.Define('probe_Phi','Muon_phi[isProbe]')
+    df = df.Define('probe_Charge', 'Muon_charge[isProbe]')
+
+    return df
+
+
+def DQMOff_TauSelection(df):
+    '''
+    Selects Z->tautau events passing a single muon trigger. Defines probe tau pt/eta/phi
+    The selections are made to match with DQM Off selections
+    '''
+    df = df.Filter('HLT_IsoMu24')
+
+    # Trigged on a Muon (probably redundant)
+    df = df.Filter('''
+    bool trigged_on_mu = false;
+    for (unsigned int i = 0; i < TrigObj_id.size(); i++){
+        if(TrigObj_id[i] == 13) trigged_on_mu = true;
+    }
+    return trigged_on_mu;
+    ''')
+
+    # Charge 
+    # L1Mu_hwCharge = 0 corresponds to Muon_charge = +1
+    # L1Mu_hwCharge = 1 corresponds to Muon_charge = -1
+    # df = df.Define('L1Mu_charge', 'charge_conversion(L1Mu_hwCharge)')
+
+    # --------------------------------------------------------
+    # Match L1Mu to trig obj with id == 13 -> L1Mu_trig_idx
+    # with L1Mu_trig_idx -> check filter bits -> L1Mu_passHLT
+    # --------------------------------------------------------
+
+    # TrigObj matching
+    df = df.Define('Muon_trig_idx', 'MatchObjToTrig(Muon_eta, Muon_phi, TrigObj_pt, TrigObj_eta, TrigObj_phi, TrigObj_id, 13, TrigObj_filterBits)')
+    df = df.Define('Muon_passHLT_IsoMu24', 'trig_is_filterbit1_set(Muon_trig_idx, TrigObj_filterBits)')
+
+    df = df.Define('Muon_PassTightId','Muon_pfIsoId>=3&&Muon_mediumPromptId') 
+    df = df.Define('Muon_MassId', 'pass_muon_met_mass_below30(Muon_pt, Muon_phi, MET_pt, MET_phi)')
+
+    df = df.Define('isTag','Muon_pt>24&&abs(Muon_eta)<2.1&&abs(Muon_pdgId)==13&&Muon_PassTightId&&Muon_passHLT_IsoMu24&&Muon_MassId')
+    df = df.Filter('Sum(isTag)>0')
+
+    df = df.Define('tagIdx', 'first_tagmuon_idx(isTag)')
+    df = df.Filter('tagIdx!=-1')
+
+    df = df.Define('tagPt', 'Muon_pt[tagIdx]')
+    df = df.Define('tagEta', 'Muon_eta[tagIdx]')
+    df = df.Define('tagPhi', 'Muon_phi[tagIdx]')
+    df = df.Define('tagMass', 'Muon_mass[tagIdx]')
+    df = df.Define('tagCharge', 'Muon_charge[tagIdx]')
+
+    nEvts = df.Count().GetValue()
+    print("There are {} events after finding tag muon".format(nEvts))
+
+    # Decay mode 5 and 6 are unphysical, so removing them
+    # Applying Tau_Id_Discrimination against e, mu, jets
+    # Applying probe tau selection criterion with the given tag muon
+    df = df.Define('Tau_PassDecayMode', 'Tau_decayMode!=5&&Tau_decayMode!=6')
+    df = df.Define('Tau_PassTightId', 'Tau_idDeepTau2018v2p5VSe>=1&&Tau_idDeepTau2018v2p5VSjet>=2&&Tau_idDeepTau2018v2p5VSmu>=1')
+    df = df.Define('Tau_PassProbe', 'pass_probeTau(Tau_pt, Tau_eta, Tau_phi, Tau_mass, Tau_charge, tagPt, tagEta, tagPhi, tagMass, tagCharge)')
+
+    ## Commenting TauID cuts for testing. 
+    ## !! Need to uncomment later
+    df = df.Define('isProbeTau', 'Tau_PassDecayMode&&Tau_PassTightId&&Tau_PassProbe')
+    # df = df.Define('isProbeTau', 'Tau_PassProbe')
+    df = df.Filter('Sum(isProbeTau)>0')
+
+    nEvts = df.Count().GetValue()
+    print("There are {} events after finding probe Taus".format(nEvts))
+
+    df = df.Define('probe_Pt','Tau_pt[isProbeTau]')
+    df = df.Define('probe_Eta','Tau_eta[isProbeTau]')
+    df = df.Define('probe_Phi','Tau_phi[isProbeTau]')
+
+    return df
+
+
+def DQMOff_JetSelection(df):
+    '''
+    Selects high jet pT events passing a single muon trigger. Defines probe leadjet pt/eta/phi
+    The selections are made to match with DQM Off selections
+    '''
+
+    df = df.Filter('HLT_IsoMu20') # Add a condition to include all the HLT filters if they exist otherwise not 
+    df = df.Filter('''
+    if (Jet_pt.size() > 0) return true;
+    return false;
+    ''')
+
+    df = df.Define('isGoodJet', 'Jet_jetId>=4')
+    df = df.Filter('Sum(isGoodJet)>0')
+    df = df.Define('isLead', 'isLeadJet(Jet_pt, isGoodJet)')
+    df = df.Define('leadJetPt', 'Jet_pt[isLead]')
+    df = df.Define('leadJetEta','Jet_eta[isLead]')
+    df = df.Define('leadJetPhi','Jet_phi[isLead]')
+
+    return df
+
 
 def makehistosforturnons_inprobeetaranges(df, histos, etavarname, phivarname, ptvarname, responsevarname, l1varname, l1thresholds, prefix, binning, l1thresholdforeffvsrunnb, offlinethresholdforeffvsrunnb, suffix = ''):
     '''Make histos for turnons vs pt (1D histos for numerator and denominator) in ranges of eta
@@ -329,8 +525,8 @@ def makehistosforturnons_inprobeetaranges(df, histos, etavarname, phivarname, pt
                 df_loc = df_loc.Define('numerator_pt',ptvarname+'[inEtaRange&&passL1Cond]')
                 histos[prefix+str_binetapt+suffix] = df_loc.Histo1D(ROOT.RDF.TH1DModel('h_{}_{}'.format(prefix, str_binetapt)+suffix, '', len(binning)-1, binning), 'numerator_pt')
 
-
     return df
+
 
 def ZEE_Plots(df, suffix = ''):
     histos = {}
@@ -416,6 +612,7 @@ def ZEE_Plots(df, suffix = ''):
             histos['L1EG30_OR_bx0_eta'+suffix] = df_eg[i].Filter("L1_UnprefireableEvent||((run>=361468)&L1_FirstBunchInTrain)").Histo1D(ROOT.RDF.TH1DModel('L1EG30_OR_bx0_eta'+suffix, '', 100, -5, 5), 'probeL1EG30Bx0_Eta')
 
     return df, histos
+    
     
 def ZMuMu_Plots(df, suffix = ''):
 
@@ -572,6 +769,509 @@ def ZMuMu_Plots(df, suffix = ''):
             '''
 
     return df, histos
+
+
+def ZEE_DQMOff_Plots(df, suffix = ''):
+
+    recoToL1PtCutFactor = config['RecoToL1PtCutFactor']
+    probeToL1Offset = config['probeToL1Offset']
+
+    df = df.Define('probe_Nvtx', 'GetProbeNvtxArray(probe_Pt, PV_npvs)')
+
+    histos = {}
+
+    df_eg = [None] * len(config['Isos'])
+    for i, iso in enumerate(config['Isos']):
+
+        prefix = iso
+
+        # Get Ids for L1 Muons which match with probe
+        df_eg[i] = df.Define('probe_idxL1EG','FindL1EGIdx_setBx(L1EG_eta, L1EG_phi, L1EG_bx, probe_Eta, probe_Phi, probe_Pt, 0, L1EG_hwIso, {})'.format(config['Isos'][iso]))
+
+        df_eg[i] = df_eg[i].Define('probe_L1Pt','GetVal(probe_idxL1EG, L1EG_pt)')
+        df_eg[i] = df_eg[i].Define('probe_L1Eta','GetVal(probe_idxL1EG, L1EG_eta)')
+        df_eg[i] = df_eg[i].Define('probe_L1Phi','GetVal(probe_idxL1EG, L1EG_phi)')
+        df_eg[i] = df_eg[i].Define('probe_L1Bx','GetVal(probe_idxL1EG, L1EG_bx)')
+        df_eg[i] = df_eg[i].Define('probe_L1Iso','GetVal(probe_idxL1EG, L1EG_hwIso)')
+
+        df_eg[i] = df_eg[i].Define('probe_L1PtReso','(probe_L1Pt - probe_Pt)/probe_Pt')
+        df_eg[i] = df_eg[i].Define('probe_L1EtaReso','(probe_L1Eta-probe_Eta)')
+        df_eg[i] = df_eg[i].Define('probe_L1PhiReso','GetReducedDeltaphi(probe_L1Phi, probe_Phi)')
+
+        pt_binning = dqmoff_egpt_bins #leptonpt_bins
+        eta_binning = dqmoff_egeta_bins
+        phi_binning = dqmoff_egphi_bins
+        nvtx_binning = dqmoff_egnvtx_bins
+        reso_pt_binning = dqmoff_egresolution_pt_bins
+        reso_eta_binning = dqmoff_egresolution_eta_bins
+        reso_phi_binning = dqmoff_egresolution_phi_bins
+        n_ptbins = len(pt_binning) - 1
+        n_etabins = len(eta_binning) - 1
+        n_phibins = len(phi_binning) - 1
+        n_nvtxbins = len(nvtx_binning) - 1
+        n_resoptbins = len(reso_pt_binning) - 1
+        n_resoetabins = len(reso_eta_binning) - 1
+        n_resophibins = len(reso_phi_binning) - 1
+
+        if config['L1TResolution']:
+
+            df_etarange = [None] * len(config['Regions'])
+            for ireg, reg in enumerate(config['Regions']):
+
+                region = config["Regions"][reg]
+                str_binEta = "eta{}to{}".format(region[0], region[1]).replace(".","p")
+
+                df_etarange[ireg] = df_eg[i].Define('inEtaRange','abs(probe_Eta)>={}'.format(region[0])+'&&abs(probe_Eta)<{}'.format(region[1]))
+                df_etarange[ireg] = df_etarange[ireg].Define('reso_pt', 'probe_L1PtReso[inEtaRange]')
+                df_etarange[ireg] = df_etarange[ireg].Define('reso_eta', 'probe_L1EtaReso[inEtaRange]')
+                df_etarange[ireg] = df_etarange[ireg].Define('reso_phi', 'probe_L1PhiReso[inEtaRange]')
+
+                # Create resolution histograms
+                histos['reso_pt_'+str_binEta+'_'+prefix+'_'+suffix] = df_etarange[ireg].Histo1D (
+                    ROOT.RDF.TH1DModel('h_EG_reso_pt_{}_{}'.format(str_binEta, prefix)+suffix, '', n_resoptbins, reso_pt_binning), 
+                    'reso_pt'
+                )
+                histos['reso_eta_'+str_binEta+'_'+prefix+'_'+suffix] = df_etarange[ireg].Histo1D (
+                    ROOT.RDF.TH1DModel('h_EG_reso_eta_{}_{}'.format(str_binEta, prefix)+suffix, '', n_resoetabins, reso_eta_binning), 
+                    'reso_eta'
+                )
+                histos['reso_phi_'+str_binEta+'_'+prefix+'_'+suffix] = df_etarange[ireg].Histo1D (
+                    ROOT.RDF.TH1DModel('h_EG_reso_phi_{}_{}'.format(str_binEta, prefix)+suffix, '', n_resophibins, reso_phi_binning), 
+                    'reso_phi'
+                )
+
+        if config['L1TEfficiency']:
+
+            df_etarange = [None] * len(config['Regions'])
+            for ireg, reg in enumerate(config['Regions']):
+                region = config["Regions"][reg]
+
+                df_etarange[ireg] = df_eg[i].Define('inEtaRange', 'abs(probe_Eta)>={}'.format(region[0])+'&&abs(probe_Eta)<{}'.format(region[1]))
+                df_etarange[ireg] = df_etarange[ireg].Define('denominator_pt', 'probe_Pt[inEtaRange]')
+
+                str_binEta = "eta{}to{}".format(region[0], region[1]).replace(".","p")
+                histos['eff_pt_'+str_binEta+'_'+prefix+'_'+suffix] = df_etarange[ireg].Histo1D (
+                    ROOT.RDF.TH1DModel('h_EG_eff_pt_{}_{}'.format(str_binEta, prefix)+suffix, '', n_ptbins, pt_binning), 
+                    'denominator_pt'
+                )
+
+                # Numerator Histograms for all Et thresholds
+                l1thresholds = config["Thresholds"]
+                for ipt in l1thresholds:
+
+                    df_loc = df_etarange[ireg].Define('passL1Cond', 'probe_L1Pt>={}'.format(ipt))
+                    df_loc = df_loc.Define('numerator_pt', 'probe_Pt[inEtaRange&&passL1Cond]')
+                    
+                    # Create numerator histograms
+                    str_binEtaPt = "eta{}to{}_l1thrgeq{}".format(region[0], region[1], ipt).replace(".","p") 
+                    histos['eff_pt_'+str_binEtaPt+'_'+prefix+'_'+suffix] = df_loc.Histo1D (
+                        ROOT.RDF.TH1DModel('h_EG_eff_pt_{}_{}'.format(str_binEtaPt, prefix)+suffix, '', n_ptbins, pt_binning), 
+                        'numerator_pt'
+                    )
+
+                    if (reg == 'EB_EE'): 
+
+                        cutfactor = ipt * recoToL1PtCutFactor
+                        offsetfactor = ipt + probeToL1Offset
+
+                        df_loc = df_loc.Define('passRecoToL1PtCutFactor', 'probe_Pt>={}'.format(cutfactor))
+                        df_loc = df_loc.Define('passL1OffsetCond', 'probe_L1Pt>={}'.format(offsetfactor))
+
+                        df_loc = df_loc.Define('denominator_eta', 'probe_Eta[inEtaRange&&passRecoToL1PtCutFactor]')
+                        df_loc = df_loc.Define('denominator_phi', 'probe_Phi[inEtaRange&&passRecoToL1PtCutFactor]')
+                        df_loc = df_loc.Define('denominator_nvtx', 'probe_Nvtx[inEtaRange&&passRecoToL1PtCutFactor]')
+
+                        # Filling denominator histos for Eff vs Phi (or Eta or Nvtx)
+                        str_binEtaPt = "eta{}to{}_probeptgeq{}".format(region[0], region[1], cutfactor).replace(".","p")
+                        histos['eff_eta_'+str_binEtaPt+'_'+prefix+'_'+suffix] = df_loc.Histo1D (
+                            ROOT.RDF.TH1DModel('h_EG_eff_eta_{}_{}'.format(str_binEtaPt, prefix)+suffix, '', n_etabins, eta_binning), 
+                            'denominator_eta'
+                        )
+                        histos['eff_phi_'+str_binEtaPt+'_'+prefix+'_'+suffix] = df_loc.Histo1D (
+                            ROOT.RDF.TH1DModel('h_EG_eff_phi_{}_{}'.format(str_binEtaPt, prefix)+suffix, '', n_phibins, phi_binning), 
+                            'denominator_phi'
+                        )
+                        histos['eff_nvtx_'+str_binEtaPt+'_'+prefix+'_'+suffix] = df_loc.Histo1D (
+                            ROOT.RDF.TH1DModel('h_EG_eff_nvtx_{}_{}'.format(str_binEtaPt, prefix)+suffix, '', n_nvtxbins, nvtx_binning), 
+                            'denominator_nvtx'
+                        )
+
+                        df_loc = df_loc.Define('numerator_eta', 'probe_Eta[inEtaRange&&passL1OffsetCond&&passRecoToL1PtCutFactor]')
+                        df_loc = df_loc.Define('numerator_phi', 'probe_Phi[inEtaRange&&passL1OffsetCond&&passRecoToL1PtCutFactor]')
+                        df_loc = df_loc.Define('numerator_nvtx', 'probe_Nvtx[inEtaRange&&passL1OffsetCond&&passRecoToL1PtCutFactor]')
+
+                        str_binEtaPt = "eta{}to{}_probeptgeq{}_l1thrgeq{}".format(region[0], region[1], cutfactor, offsetfactor).replace(".","p")
+                        histos['eff_eta_'+str_binEtaPt+'_'+prefix+'_'+suffix] = df_loc.Histo1D (
+                            ROOT.RDF.TH1DModel('h_EG_eff_eta_{}_{}'.format(str_binEtaPt, prefix)+suffix, '', n_etabins, eta_binning), 
+                            'numerator_eta'
+                        )
+                        histos['eff_phi_'+str_binEtaPt+'_'+prefix+'_'+suffix] = df_loc.Histo1D (
+                            ROOT.RDF.TH1DModel('h_EG_eff_phi_{}_{}'.format(str_binEtaPt, prefix)+suffix, '', n_phibins, phi_binning), 
+                            'numerator_phi'
+                        )
+                        histos['eff_nvtx_'+str_binEtaPt+'_'+prefix+'_'+suffix] = df_loc.Histo1D (
+                            ROOT.RDF.TH1DModel('h_EG_eff_nvtx_{}_{}'.format(str_binEtaPt, prefix)+suffix, '', n_nvtxbins, nvtx_binning), 
+                            'numerator_nvtx'
+                        )
+
+    return df, histos
+
+
+def ZMuMu_DQMOff_Plots(df, suffix = ''):
+
+    recoToL1PtCutFactor = config['RecoToL1PtCutFactor']
+
+    df = df.Define('probe_Nvtx', 'GetProbeNvtxArray(probe_Pt, PV_npvs)')
+    df = df.Define('L1Mu_charge', 'charge_conversion(L1Mu_hwCharge)')
+
+    histos = {}
+    df_mu = [None] * len(config['Qualities'])
+
+    for i, qual in enumerate(config['Qualities']):
+
+        prefix = qual
+
+        # Get Ids for L1 Muons which match with probe
+        df_mu[i] = df.Define('probe_idxL1Mu','FindL1MuIdx_DQMOff(L1Mu_eta, L1Mu_phi, probe_Eta, probe_Phi, probe_Pt, probe_Charge, L1Mu_hwQual, {})'.format(config["Qualities"][qual]))
+
+        df_mu[i] = df_mu[i].Define('probe_L1Pt','GetVal(probe_idxL1Mu, L1Mu_pt)')
+        df_mu[i] = df_mu[i].Define('probe_L1Eta','GetVal(probe_idxL1Mu, L1Mu_eta)')
+        df_mu[i] = df_mu[i].Define('probe_L1Phi','GetVal(probe_idxL1Mu, L1Mu_phi)')
+        df_mu[i] = df_mu[i].Define('probe_L1Bx','GetVal(probe_idxL1Mu, L1Mu_bx)')
+        df_mu[i] = df_mu[i].Define('probe_L1Qual','GetVal(probe_idxL1Mu, L1Mu_hwQual)')
+        df_mu[i] = df_mu[i].Define('probe_L1Charge','GetVal(probe_idxL1Mu, L1Mu_charge)')
+
+        df_mu[i] = df_mu[i].Define('probe_L1PtReso','((probe_L1Charge*probe_Charge*probe_Pt)-probe_L1Pt)/probe_L1Pt')
+        df_mu[i] = df_mu[i].Define('probe_L1EtaReso','(probe_L1Eta-probe_Eta)')
+        # df_mu[i] = df_mu[i].Define('probe_L1PhiReso','(probe_L1Phi-probe_Phi)')
+        df_mu[i] = df_mu[i].Define('probe_L1PhiReso','GetReducedDeltaphi(probe_L1Phi, probe_Phi)')
+
+        pt_binning = dqmoff_muonpt_bins #leptonpt_bins
+        eta_binning = dqmoff_muoneta_bins
+        phi_binning = dqmoff_muonphi_bins
+        nvtx_binning = dqmoff_muonnvtx_bins
+        reso_pt_binning = dqmoff_muonresolution_pt_bins
+        reso_eta_binning = dqmoff_muonresolution_eta_bins
+        reso_phi_binning = dqmoff_muonresolution_phi_bins
+        n_ptbins = len(pt_binning) - 1
+        n_etabins = len(eta_binning) - 1
+        n_phibins = len(phi_binning) - 1
+        n_nvtxbins = len(nvtx_binning) - 1
+        n_resoptbins = len(reso_pt_binning) - 1
+        n_resoetabins = len(reso_eta_binning) - 1
+        n_resophibins = len(reso_phi_binning) - 1
+
+        if config['L1TResolution']:
+
+            df_etarange = [None] * len(config['Regions'])
+            for ireg, reg in enumerate(config['Regions']):
+
+                region = config["Regions"][reg]
+                str_binEta = "eta{}to{}".format(region[0], region[1]).replace(".","p")
+
+                df_etarange[ireg] = df_mu[i].Define('inEtaRange','abs(probe_Eta)>={}'.format(region[0])+'&&abs(probe_Eta)<{}'.format(region[1]))
+                df_etarange[ireg] = df_etarange[ireg].Define('reso_pt', 'probe_L1PtReso[inEtaRange]')
+                df_etarange[ireg] = df_etarange[ireg].Define('reso_eta', 'probe_L1EtaReso[inEtaRange]')
+                df_etarange[ireg] = df_etarange[ireg].Define('reso_phi', 'probe_L1PhiReso[inEtaRange]')
+
+                # Create resolution histograms
+                histos['reso_pt_'+str_binEta+'_'+prefix+'_'+suffix] = df_etarange[ireg].Histo1D (
+                    ROOT.RDF.TH1DModel('h_Mu_reso_pt_{}_{}'.format(str_binEta, prefix)+suffix, '', n_resoptbins, reso_pt_binning), 
+                    'reso_pt'
+                )
+                histos['reso_eta_'+str_binEta+'_'+prefix+'_'+suffix] = df_etarange[ireg].Histo1D (
+                    ROOT.RDF.TH1DModel('h_Mu_reso_eta_{}_{}'.format(str_binEta, prefix)+suffix, '', n_resoetabins, reso_eta_binning), 
+                    'reso_eta'
+                )
+                histos['reso_phi_'+str_binEta+'_'+prefix+'_'+suffix] = df_etarange[ireg].Histo1D (
+                    ROOT.RDF.TH1DModel('h_Mu_reso_phi_{}_{}'.format(str_binEta, prefix)+suffix, '', n_resophibins, reso_phi_binning), 
+                    'reso_phi'
+                )
+
+        if config['L1TEfficiency']:
+
+            df_etarange = [None] * len(config['Regions'])
+            for ireg, reg in enumerate(config['Regions']):
+                region = config["Regions"][reg]
+                
+                df_etarange[ireg] = df_mu[i].Define('inEtaRange', 'abs(probe_Eta)>={}'.format(region[0])+'&&abs(probe_Eta)<{}'.format(region[1]))
+                df_etarange[ireg] = df_etarange[ireg].Define('denominator_pt', 'probe_Pt[inEtaRange]')
+                
+                # Create denominator histograms for pt
+                str_binEta = "eta{}to{}".format(region[0], region[1]).replace(".","p")
+                histos['eff_pt_'+str_binEta+'_'+prefix+'_'+suffix] = df_etarange[ireg].Histo1D (
+                    ROOT.RDF.TH1DModel('h_Mu_eff_pt_{}_{}'.format(str_binEta, prefix)+suffix, '', n_ptbins, pt_binning), 
+                    'denominator_pt'
+                )
+
+                # Numerator Histograms for all Et thresholds
+                l1thresholds = config["Thresholds"]
+                for ipt in l1thresholds:
+
+                    cutfactor = ipt * recoToL1PtCutFactor
+                    df_loc = df_etarange[ireg].Define('passRecoToL1PtCutFactor', 'probe_Pt>={}'.format(cutfactor))
+                    
+                    df_loc = df_loc.Define('denominator_phi', 'probe_Phi[inEtaRange&&passRecoToL1PtCutFactor]')
+                    df_loc = df_loc.Define('denominator_nvtx', 'probe_Nvtx[inEtaRange&&passRecoToL1PtCutFactor]')
+
+                    # Filling denominator histos for Eff vs Phi (or Eta or Nvtx)
+                    str_binEtaPt = "eta{}to{}_probeptgeq{}".format(region[0], region[1], cutfactor).replace(".","p")
+                    histos['eff_phi_'+str_binEtaPt+'_'+prefix+'_'+suffix] = df_loc.Histo1D (
+                        ROOT.RDF.TH1DModel('h_Mu_eff_phi_{}_{}'.format(str_binEtaPt, prefix)+suffix, '', n_phibins, phi_binning), 
+                        'denominator_phi'
+                    )
+                    histos['eff_nvtx_'+str_binEtaPt+'_'+prefix+'_'+suffix] = df_loc.Histo1D (
+                        ROOT.RDF.TH1DModel('h_Mu_eff_nvtx_{}_{}'.format(str_binEtaPt, prefix)+suffix, '', n_nvtxbins, nvtx_binning), 
+                        'denominator_nvtx'
+                    )
+                    if (reg == 'AllEta'): 
+                        df_loc = df_loc.Define('denominator_eta', 'probe_Eta[inEtaRange&&passRecoToL1PtCutFactor]')
+                        histos['eff_eta_'+str_binEtaPt+'_'+prefix+'_'+suffix] = df_loc.Histo1D (
+                            ROOT.RDF.TH1DModel('h_Mu_eff_eta_{}_{}'.format(str_binEtaPt, prefix)+suffix, '', n_etabins, eta_binning), 
+                            'denominator_eta'
+                        )
+
+                    df_loc = df_loc.Define('passL1Cond', 'probe_L1Pt>={}'.format(ipt))
+                    df_loc = df_loc.Define('numerator_pt', 'probe_Pt[inEtaRange&&passL1Cond]')
+                    df_loc = df_loc.Define('numerator_phi', 'probe_Phi[inEtaRange&&passL1Cond&&passRecoToL1PtCutFactor]')
+                    df_loc = df_loc.Define('numerator_nvtx', 'probe_Nvtx[inEtaRange&&passL1Cond&&passRecoToL1PtCutFactor]')
+
+                    # Create numerator histograms
+                    str_binEtaPt = "eta{}to{}_l1thrgeq{}".format(region[0], region[1], ipt).replace(".","p") 
+                    histos['eff_pt_'+str_binEtaPt+'_'+prefix+'_'+suffix] = df_loc.Histo1D (
+                        ROOT.RDF.TH1DModel('h_Mu_eff_pt_{}_{}'.format(str_binEtaPt, prefix)+suffix, '', n_ptbins, pt_binning), 
+                        'numerator_pt'
+                    )
+
+                    str_binEtaPt = "eta{}to{}_probeptgeq{}_l1thrgeq{}".format(region[0], region[1], cutfactor, ipt).replace(".","p") 
+                    histos['eff_phi_'+str_binEtaPt+'_'+prefix+'_'+suffix] = df_loc.Histo1D (
+                        ROOT.RDF.TH1DModel('h_Mu_eff_phi_{}_{}'.format(str_binEtaPt, prefix)+suffix, '', n_phibins, phi_binning), 
+                        'numerator_phi'
+                    )
+                    histos['eff_nvtx_'+str_binEtaPt+'_'+prefix+'_'+suffix] = df_loc.Histo1D (
+                        ROOT.RDF.TH1DModel('h_Mu_eff_nvtx_{}_{}'.format(str_binEtaPt, prefix)+suffix, '', n_nvtxbins, nvtx_binning), 
+                        'numerator_nvtx'
+                    )
+                    if (reg == 'AllEta'):
+                        df_loc = df_loc.Define('numerator_eta', 'probe_Eta[inEtaRange&&passL1Cond&&passRecoToL1PtCutFactor]')
+                        histos['eff_eta_'+str_binEtaPt+'_'+prefix+'_'+suffix] = df_loc.Histo1D (
+                            ROOT.RDF.TH1DModel('h_Mu_eff_eta_{}_{}'.format(str_binEtaPt, prefix)+suffix, '', n_etabins, eta_binning), 
+                            'numerator_eta'
+                        )
+    return df, histos
+
+
+def ZTauTau_DQMOff_Plots(df, suffix = ''):
+
+    df = df.Define('probe_Nvtx', 'GetProbeNvtxArray(probe_Pt, PV_npvs)')
+    histos = {}
+
+    df_tau = [None] * len(config['Isos'])
+    for i, iso in enumerate(config['Isos']):
+
+        prefix = iso
+
+        # Get Ids for L1 Taus which match with probe
+        df_tau[i] = df.Define('probe_idxL1tau','FindL1TauIdx_DQMOff(L1Tau_eta, L1Tau_phi, probe_Eta, probe_Phi, L1Tau_hwIso, {})'.format(config['Isos'][iso]))
+
+        df_tau[i] = df_tau[i].Define('probe_L1Pt','GetVal(probe_idxL1tau, L1Tau_pt)')
+        df_tau[i] = df_tau[i].Define('probe_L1Eta','GetVal(probe_idxL1tau, L1Tau_eta)')
+        df_tau[i] = df_tau[i].Define('probe_L1Phi','GetVal(probe_idxL1tau, L1Tau_phi)')
+        df_tau[i] = df_tau[i].Define('probe_L1Bx','GetVal(probe_idxL1tau, L1Tau_bx)')
+        df_tau[i] = df_tau[i].Define('probe_L1Iso','GetVal(probe_idxL1tau, L1Tau_hwIso)')
+
+        df_tau[i] = df_tau[i].Define('probe_L1PtReso','(probe_Pt-probe_L1Pt)/probe_L1Pt')
+        df_tau[i] = df_tau[i].Define('probe_L1EtaReso','(probe_L1Eta-probe_Eta)')
+        df_tau[i] = df_tau[i].Define('probe_L1PhiReso','(probe_L1Phi-probe_Phi)')
+
+        pt_binning = dqmoff_taupt_bins #leptonpt_bins
+        eta_binning = dqmoff_taueta_bins
+        phi_binning = dqmoff_tauphi_bins
+        nvtx_binning = dqmoff_taunvtx_bins
+        reso_pt_binning = dqmoff_tauresolution_pt_bins
+        reso_eta_binning = dqmoff_tauresolution_eta_bins
+        reso_phi_binning = dqmoff_tauresolution_phi_bins
+        n_ptbins = len(pt_binning) - 1
+        n_etabins = len(eta_binning) - 1
+        n_phibins = len(phi_binning) - 1
+        n_nvtxbins = len(nvtx_binning) - 1
+        n_resoptbins = len(reso_pt_binning) - 1
+        n_resoetabins = len(reso_eta_binning) - 1
+        n_resophibins = len(reso_phi_binning) - 1
+
+        if config['L1TResolution']:
+
+            df_etarange = [None] * len(config['Regions'])
+            for ireg, reg in enumerate(config['Regions']):
+
+                region = config["Regions"][reg]
+                str_binEta = "eta{}to{}".format(region[0], region[1]).replace(".","p")
+
+                df_etarange[ireg] = df_tau[i].Define('inEtaRange','abs(probe_Eta)>={}'.format(region[0])+'&&abs(probe_Eta)<{}'.format(region[1]))
+                df_etarange[ireg] = df_etarange[ireg].Define('reso_pt', 'probe_L1PtReso[inEtaRange]')
+                df_etarange[ireg] = df_etarange[ireg].Define('reso_eta', 'probe_L1EtaReso[inEtaRange]')
+                df_etarange[ireg] = df_etarange[ireg].Define('reso_phi', 'probe_L1PhiReso[inEtaRange]')
+
+                # Create resolution histograms
+                histos['reso_pt_'+str_binEta+'_'+prefix+'_'+suffix] = df_etarange[ireg].Histo1D (
+                    ROOT.RDF.TH1DModel('h_Tau_reso_pt_{}_{}'.format(str_binEta, prefix)+suffix, '', n_resoptbins, reso_pt_binning), 
+                    'reso_pt'
+                )
+                histos['reso_eta_'+str_binEta+'_'+prefix+'_'+suffix] = df_etarange[ireg].Histo1D (
+                    ROOT.RDF.TH1DModel('h_Tau_reso_eta_{}_{}'.format(str_binEta, prefix)+suffix, '', n_resoetabins, reso_eta_binning), 
+                    'reso_eta'
+                )
+                histos['reso_phi_'+str_binEta+'_'+prefix+'_'+suffix] = df_etarange[ireg].Histo1D (
+                    ROOT.RDF.TH1DModel('h_Tau_reso_phi_{}_{}'.format(str_binEta, prefix)+suffix, '', n_resophibins, reso_phi_binning), 
+                    'reso_phi'
+                )
+
+
+        if config['L1TEfficiency']:
+
+            df_etarange = [None] * len(config['Regions'])
+            for ireg, reg in enumerate(config['Regions']):
+
+                region = config["Regions"][reg]
+                str_binEta = "eta{}to{}".format(region[0], region[1]).replace(".","p")
+
+                df_etarange[ireg] = df_tau[i].Define('inEtaRange','abs(probe_Eta)>={}'.format(region[0])+'&&abs(probe_Eta)<{}'.format(region[1]))
+                df_etarange[ireg] = df_etarange[ireg].Define('denominator_pt', 'probe_Pt[inEtaRange]')
+                df_etarange[ireg] = df_etarange[ireg].Define('denominator_phi', 'probe_Phi[inEtaRange]')
+                df_etarange[ireg] = df_etarange[ireg].Define('denominator_nvtx', 'probe_Nvtx[inEtaRange]')
+
+                # Create denominator histograms
+                histos['eff_pt_'+str_binEta+'_'+prefix+'_'+suffix] = df_etarange[ireg].Histo1D (
+                    ROOT.RDF.TH1DModel('h_Tau_eff_pt_{}_{}'.format(str_binEta, prefix)+suffix, '', n_ptbins, pt_binning), 
+                    'denominator_pt'
+                )
+                histos['eff_phi_'+str_binEta+'_'+prefix+'_'+suffix] = df_etarange[ireg].Histo1D (
+                    ROOT.RDF.TH1DModel('h_Tau_eff_phi_{}_{}'.format(str_binEta, prefix)+suffix, '', n_phibins, phi_binning), 
+                    'denominator_phi'
+                )
+                histos['eff_nvtx_'+str_binEta+'_'+prefix+'_'+suffix] = df_etarange[ireg].Histo1D (
+                    ROOT.RDF.TH1DModel('h_Tau_eff_nvtx_{}_{}'.format(str_binEta, prefix)+suffix, '', n_nvtxbins, nvtx_binning), 
+                    'denominator_nvtx'
+                )
+
+                if (reg == 'EB_EE'): 
+                    df_etarange[ireg] = df_etarange[ireg].Define('denominator_eta', 'probe_Eta[inEtaRange]')
+                    histos['eff_eta_'+str_binEta+'_'+prefix+'_'+suffix] = df_etarange[ireg].Histo1D (
+                        ROOT.RDF.TH1DModel('h_Tau_eff_eta_{}_{}'.format(str_binEta, prefix)+suffix, '', n_etabins, eta_binning), 
+                        'denominator_eta'
+                    )
+
+                # Numerator Histograms for all Et thresholds
+                l1thresholds = config["Thresholds"]
+                for ipt in l1thresholds:
+                    str_binEtaPt = "eta{}to{}_l1thrgeq{}".format(region[0], region[1], ipt).replace(".","p")
+                    df_loc = df_etarange[ireg].Define('passL1Cond', 'probe_L1Pt>={}'.format(ipt))
+                    df_loc = df_loc.Define('numerator_pt', 'probe_Pt[inEtaRange&&passL1Cond]')
+                    df_loc = df_loc.Define('numerator_phi', 'probe_Phi[inEtaRange&&passL1Cond]')
+                    df_loc = df_loc.Define('numerator_nvtx', 'probe_Nvtx[inEtaRange&&passL1Cond]')
+
+                    # Create numerator histograms
+                    histos['eff_pt_'+str_binEtaPt+'_'+prefix+'_'+suffix] = df_loc.Histo1D (
+                        ROOT.RDF.TH1DModel('h_Tau_eff_pt_{}_{}'.format(str_binEtaPt, prefix)+suffix, '', n_ptbins, pt_binning), 
+                        'numerator_pt'
+                    )
+                    histos['eff_phi_'+str_binEtaPt+'_'+prefix+'_'+suffix] = df_loc.Histo1D (
+                        ROOT.RDF.TH1DModel('h_Tau_eff_phi_{}_{}'.format(str_binEtaPt, prefix)+suffix, '', n_phibins, phi_binning), 
+                        'numerator_phi'
+                    )
+                    histos['eff_nvtx_'+str_binEtaPt+'_'+prefix+'_'+suffix] = df_loc.Histo1D (
+                        ROOT.RDF.TH1DModel('h_Tau_eff_nvtx_{}_{}'.format(str_binEtaPt, prefix)+suffix, '', n_nvtxbins, nvtx_binning), 
+                        'numerator_nvtx'
+                    )
+
+                    if (reg == 'EB_EE'):
+                        df_loc = df_loc.Define('numerator_eta', 'probe_Eta[inEtaRange&&passL1Cond]')
+                        histos['eff_eta_'+str_binEtaPt+'_'+prefix+'_'+suffix] = df_loc.Histo1D (
+                            ROOT.RDF.TH1DModel('h_Tau_eff_eta_{}_{}'.format(str_binEtaPt, prefix)+suffix, '', n_etabins, eta_binning), 
+                            'numerator_eta'
+                        )
+    return df, histos
+
+
+def Jet_DQMOff_Plots(df, suffix = ''):
+
+    histos = {}
+    prefix = ''
+
+    df_jet = df.Define('lead_idxL1Jet', 'FindL1JetIdx_DQMOff_setBx(L1Jet_eta, L1Jet_phi, L1Jet_bx, leadJetEta, leadJetPhi, 0)')
+    df_jet = df_jet.Define('lead_L1JetPt', 'GetVal(lead_idxL1Jet, L1Jet_pt)')
+    df_jet = df_jet.Define('lead_L1JetEta', 'GetVal(lead_idxL1Jet, L1Jet_eta)')
+    df_jet = df_jet.Define('lead_L1JetPhi', 'GetVal(lead_idxL1Jet, L1Jet_phi)')
+    df_jet = df_jet.Define('lead_L1JetBx', 'GetVal(lead_idxL1Jet, L1Jet_bx)')
+
+    df_jet = df_jet.Define('lead_L1PtReso', '(lead_L1JetPt - leadJetPt)/leadJetPt')
+    df_jet = df_jet.Define('lead_L1EtaReso', '(lead_L1JetEta - leadJetEta)')
+    df_jet = df_jet.Define('lead_L1PhiReso', 'GetReducedDeltaphi(lead_L1JetPhi, leadJetPhi)')
+
+    pt_binning = dqmoff_jetpt_bins
+    reso_pt_binning = dqmoff_jetresolution_pt_bins
+    reso_eta_binning = dqmoff_jetresolution_eta_bins
+    reso_phi_binning = dqmoff_jetresolution_phi_bins
+    n_ptbins = len(pt_binning) - 1
+    n_resoptbins = len(reso_pt_binning) - 1
+    n_resoetabins = len(reso_eta_binning) - 1
+    n_resophibins = len(reso_phi_binning) - 1
+
+    if config['L1TResolution']:
+        df_etarange = [None] * len(config['Regions'])
+        for ireg, reg in enumerate(config['Regions']):
+            region = config["Regions"][reg]
+            str_binEta = "eta{}to{}".format(region[0], region[1]).replace(".","p")
+
+            df_etarange[ireg] = df_jet.Define('inEtaRange','abs(leadJetEta)>={}'.format(region[0])+'&&abs(leadJetEta)<{}'.format(region[1]))
+            df_etarange[ireg] = df_etarange[ireg].Define('reso_pt', 'lead_L1PtReso[inEtaRange]')
+            df_etarange[ireg] = df_etarange[ireg].Define('reso_eta', 'lead_L1EtaReso[inEtaRange]')
+            df_etarange[ireg] = df_etarange[ireg].Define('reso_phi', 'lead_L1PhiReso[inEtaRange]')
+
+            # Create resolution histograms
+            histos['reso_pt_'+str_binEta+'_'+prefix+'_'+suffix] = df_etarange[ireg].Histo1D (
+                ROOT.RDF.TH1DModel('h_LeadJet_reso_pt_{}_{}'.format(str_binEta, prefix)+suffix, '', n_resoptbins, reso_pt_binning), 
+                'reso_pt'
+            )
+            histos['reso_eta_'+str_binEta+'_'+prefix+'_'+suffix] = df_etarange[ireg].Histo1D (
+                ROOT.RDF.TH1DModel('h_LeadJet_reso_eta_{}_{}'.format(str_binEta, prefix)+suffix, '', n_resoetabins, reso_eta_binning), 
+                'reso_eta'
+            )
+            histos['reso_phi_'+str_binEta+'_'+prefix+'_'+suffix] = df_etarange[ireg].Histo1D (
+                ROOT.RDF.TH1DModel('h_LeadJet_reso_phi_{}_{}'.format(str_binEta, prefix)+suffix, '', n_resophibins, reso_phi_binning), 
+                'reso_phi'
+            )
+
+    if config['L1TEfficiency']:
+        df_etarange = [None] * len(config['Regions'])
+        for ireg, reg in enumerate(config['Regions']):
+            region = config["Regions"][reg]
+
+            df_etarange[ireg] = df_jet.Define('inEtaRange','abs(leadJetEta)>={}'.format(region[0])+'&&abs(leadJetEta)<{}'.format(region[1]))
+            df_etarange[ireg] = df_etarange[ireg].Define('denominator_pt', 'leadJetPt[inEtaRange]')
+            
+            # Create denominator histograms for pt
+            str_binEta = "eta{}to{}".format(region[0], region[1]).replace(".","p")
+            histos['eff_pt_'+str_binEta+'_'+prefix+'_'+suffix] = df_etarange[ireg].Histo1D (
+                ROOT.RDF.TH1DModel('h_LeadJet_eff_pt_{}_{}'.format(str_binEta, prefix)+suffix, '', n_ptbins, pt_binning), 
+                'denominator_pt'
+            )
+
+            # Numerator Histograms for all Et thresholds
+            l1thresholds = config["Thresholds"]
+            for ipt in l1thresholds:
+                df_loc = df_etarange[ireg].Define('passL1Cond', 'lead_L1JetPt>={}'.format(ipt))
+                df_loc = df_loc.Define('numerator_pt', 'leadJetPt[inEtaRange&&passL1Cond]')
+
+                str_binEtaPt = "eta{}to{}_l1thrgeq{}".format(region[0], region[1], ipt).replace(".","p") 
+                histos['eff_pt_'+str_binEtaPt+'_'+prefix+'_'+suffix] = df_loc.Histo1D (
+                    ROOT.RDF.TH1DModel('h_LeadJet_eff_pt_{}_{}'.format(str_binEtaPt, prefix)+suffix, '', n_ptbins, pt_binning), 
+                    'numerator_pt'
+                )
+
+    return df, histos
+
+
     
 def CleanJets(df):
     #List of cleaned jets (noise cleaning + lepton/photon overlap removal)
@@ -621,19 +1321,23 @@ def EtSum(df, suffix = ''):
     df = df.Define('MetNoMu','sqrt(metnomu_x*metnomu_x+metnomu_y*metnomu_y)')
 
     # Dijet selections
-    df = df.Define('hastwocleanjets', 'PassDiJet80_40_Mjj500(cleanJet_Pt, cleanJet_Eta, cleanJet_Phi)')
-    df = df.Define('vbf_selection', 'PassDiJet140_70_Mjj900(cleanJet_Pt, cleanJet_Eta, cleanJet_Phi)')
+    df = df.Define('hastwocleanjets', 'PassDiJet(cleanJet_Pt, cleanJet_Eta, cleanJet_Phi, 80, 40, 500)')
+    df = df.Define('vbf_selection', 'PassDiJet(cleanJet_Pt, cleanJet_Eta, cleanJet_Phi, 140, 70, 900)')
     df = df.Define('hastwocentraljets', 'PassDiJet80_40_Mjj500_central(cleanJet_Pt, cleanJet_Eta, cleanJet_Phi)')
     df = df.Define('hastwoHFjets', 'PassDiJet80_40_Mjj500_HF(cleanJet_Pt, cleanJet_Eta, cleanJet_Phi)')
 
+    # for VBF trig
+    #df = df.Define('HLT_VBF_filter', 'run>367661&&PassDiJet75_40_500(cleanJet_Pt, cleanJet_Eta, cleanJet_Phi)')
+    df = df.Define('HLT_VBF_filter', 'PassDiJet75_40_500(cleanJet_Pt, cleanJet_Eta, cleanJet_Phi)')
+
     histos['h_MetNoMu_Denominator'+suffix] = df.Histo1D(ROOT.RDF.TH1DModel('h_MetNoMu_Denominator'+suffix, '', len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'MetNoMu') 
     
-    dfmetl1 = df.Filter('L1_ETMHF80')
-    #dfmetl1 = df.Filter('MET_sumEt>80')
-    #dfmetl1 = df.Filter('PuppiMET_sumEt>80')
-    histos['L1_ETMHF80'+suffix] = dfmetl1.Histo1D(ROOT.RDF.TH1DModel('h_MetNoMu_ETMHF80'+suffix, '', len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'MetNoMu')
-    dfmetl1 = df.Filter('L1_ETMHF90')
-    histos['L1_ETMHF90'+suffix] = dfmetl1.Histo1D(ROOT.RDF.TH1DModel('h_MetNoMu_ETMHF90'+suffix, '', len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'MetNoMu')
+#    dfmetl1 = df.Filter('L1_ETMHF80')
+#    #dfmetl1 = df.Filter('MET_sumEt>80')
+#    #dfmetl1 = df.Filter('PuppiMET_sumEt>80')
+#    histos['L1_ETMHF80'+suffix] = dfmetl1.Histo1D(ROOT.RDF.TH1DModel('h_MetNoMu_ETMHF80'+suffix, '', len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'MetNoMu')
+#    dfmetl1 = df.Filter('L1_ETMHF90')
+#    histos['L1_ETMHF90'+suffix] = dfmetl1.Histo1D(ROOT.RDF.TH1DModel('h_MetNoMu_ETMHF90'+suffix, '', len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'MetNoMu')
     dfmetl1 = df.Filter('L1_ETMHF100')
     histos['L1_ETMHF100'+suffix] = dfmetl1.Histo1D(ROOT.RDF.TH1DModel('h_MetNoMu_ETMHF100'+suffix, '', len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'MetNoMu')
     dfmetl1 = df.Filter('L1_ETMHF110')
@@ -673,6 +1377,11 @@ def EtSum(df, suffix = ''):
 
     # VBF (Met + jet) trigger
     histos['HLT_DiJet110_35_Mjj650_PFMET110_DiJet140_70_Mjj900'+suffix] =  df.Filter('HLT_DiJet110_35_Mjj650_PFMET110&&vbf_selection').Histo1D(ROOT.RDF.TH1DModel('h_HLT_DiJet110_35_Mjj650_PFMET110_DiJet140_70_Mjj900'+suffix, '', len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'MetNoMu')
+
+    # VBF trigger
+    if max(runnb_bins) > 367661:
+        histos['h_MetNoMu_Denominator_VBF_DiJet70_40_500'+suffix] = df.Filter('run>367661').Filter('HLT_VBF_filter').Histo1D(ROOT.RDF.TH1DModel('h_MetNoMu_Denominator_VBF_DiJet70_40_500'+suffix, '', len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'MetNoMu')
+        histos['HLT_VBF_DiPFJet75_40_Mjj500_Detajj2p5_PFMET85'+suffix] =  df.Filter('run>367661').Filter('HLT_VBF_filter&&HLT_VBF_DiPFJet75_40_Mjj500_Detajj2p5_PFMET85').Histo1D(ROOT.RDF.TH1DModel('HLT_VBF_DiPFJet75_40_Mjj500_Detajj2p5_PFMET85'+suffix, '', len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'MetNoMu')
 
     return df, histos
 

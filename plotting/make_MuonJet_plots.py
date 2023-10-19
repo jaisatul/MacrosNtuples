@@ -462,6 +462,27 @@ def main():
                     **HTT280_kwargs, **MET_PU_kwargs, **common_kwargs,
                     )
 
+            # VBF plot
+#            VBF75_40_500_kwargs = {
+#                'num': ['HLT_VBF_DiPFJet75_40_Mjj500_Detajj2p5_PFMET85'],
+#                'den': ['h_MetNoMu_Denominator_VBF_DiJet70_40_500'],
+#                'legendlabels': ['VBF_DiPFJet75_40_Mjj500'],
+#                'xtitle': 'PuppiMET(#mu subtracted) (GeV)',
+#                }
+
+#            drawplots.makeeff(
+#                axisranges = [0., 2000.],
+#                plotname = 'L1ETSum_FromSingleMuon_DiPFJet75_40_Mjj500_TurnOn',
+#                **VBF75_40_500_kwargs, **MET_kwargs, **common_kwargs,
+#                )
+
+#            drawplots.makeeff(
+#                axisranges = [0., 400.],
+#                plotname = 'L1ETSum_FromSingleMuon_DiPFJet75_40_Mjj500_TurnOn_Zoom',
+#                **VBF75_40_500_kwargs, **MET_kwargs, **common_kwargs,
+#                )
+
+
 
 if __name__ == '__main__':
     main()

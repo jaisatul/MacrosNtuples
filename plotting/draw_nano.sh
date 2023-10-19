@@ -1,6 +1,9 @@
 #!/bin/bash
 
-for dir in "2023B" "2023C" "all2023"
+# For all of 2023
+for dir in "2022EG" "golden_2022EG" "2023B" "golden_2023B" "2023C" "golden_2023C" "all2023" "golden_all2023"
+# For reprocessed 2018 and 2022:
+#for dir in "2018Nano" "golden_2018Nano" "20222Nano" "golden_2022Nano"
 do
     # Using CMS OMS to get an approximation of the lumi:
     case $dir in
