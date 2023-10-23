@@ -5,13 +5,14 @@ import os
 import sys
 import argparse
 
-
+#Get absolute location of code package
+topDir = os.getcwd().split('MacrosNtuples')[0]+'MacrosNtuples/'
 
 #In case you want to load an helper for C++ functions
-ROOT.gInterpreter.Declare('#include "../helpers/Helper.h"')
-ROOT.gInterpreter.Declare('#include "../helpers/Helper_InvariantMass.h"')
+ROOT.gInterpreter.Declare('#include "'+topDir+'helpers/Helper.h"')
+ROOT.gInterpreter.Declare('#include "'+topDir+'helpers/Helper_InvariantMass.h"')
 #Importing stuff from other python files
-sys.path.insert(0, '../helpers')
+sys.path.insert(0, topDir+'helpers')
 
 from helper import * 
 

@@ -1,8 +1,12 @@
 # make_ZToEE_plots.py, a program to draw the L1Studies plots obtained from the histograms extracted from NanoAOD
 
+import os
 import yaml
 import drawplots
 import argparse
+
+#Get absolute location of code packaage
+topDir = os.getcwd().split('MacrosNtuples')[0]+'MacrosNtuples/'
 
 def main():
     parser = argparse.ArgumentParser(
@@ -11,7 +15,7 @@ def main():
         formatter_class=argparse.RawTextHelpFormatter)
     
     parser.add_argument("-d", "--dir", dest="dir", help="The directory to read the inputs files from and draw the plots to", type=str, default='./')
-    parser.add_argument("-c", "--config", dest="config", help="The YAML config to read from", type=str, default='../config_cards/full_ZToEE.yaml')
+    parser.add_argument("-c", "--config", dest="config", help="The YAML config to read from", type=str, default=topDir+'config_cards/full_ZToEE.yaml')
     parser.add_argument("-l", "--lumi", dest="lumi", help="The integrated luminosity to display in the top right corner of the plot", type=str, default='')
 
     args = parser.parse_args()

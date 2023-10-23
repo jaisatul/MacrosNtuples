@@ -4,13 +4,14 @@ import os
 import sys
 import argparse
 
-
+#Get absolute location of code package
+topDir = os.getcwd().split('MacrosNtuples')[0]+'MacrosNtuples/'
 
 #In case you want to load an helper for C++ functions
-ROOT.gInterpreter.Declare('#include "../helpers/Helper.h"')
-ROOT.gInterpreter.Declare('#include "../helpers/Helper_InvariantMass.h"')
+ROOT.gInterpreter.Declare('#include "'+topDir+'helpers/Helper.h"')
+ROOT.gInterpreter.Declare('#include "'+topDir+'helpers/Helper_InvariantMass.h"')
 #Importing stuff from other python files
-sys.path.insert(0, '../helpers')
+sys.path.insert(0, topDir+'helpers')
 
 #from helper_nano import * 
 import helper_nano as h
@@ -70,24 +71,24 @@ def main():
     config_file = args.config
     if config_file == '':
         if args.channel == 'PhotonJet':
-            config_file = '../config_cards/full_PhotonJet.yaml'
+            config_file = topDir+'config_cards/full_PhotonJet.yaml'
         elif args.channel == 'MuonJet':
-            config_file = '../config_cards/full_MuonJet.yaml'
+            config_file = topDir+'config_cards/full_MuonJet.yaml'
         elif args.channel == 'ZToMuMu':
-            config_file = '../config_cards/full_ZToMuMu.yaml'
+            config_file = topDir+'config_cards/full_ZToMuMu.yaml'
         elif args.channel == 'ZToEE':
-            config_file = '../config_cards/full_ZToEE.yaml'
+            config_file = topDir+'config_cards/full_ZToEE.yaml'
         elif args.channel == 'ZToTauTau':
-            config_file = '../config_cards/full_ZToTauTau.yaml'
+            config_file = topDir+'config_cards/full_ZToTauTau.yaml'
         ## For DQM Offline plots
         elif args.channel == 'ZToMuMuDQMOff':
-            config_file = '../config_cards/full_ZToMuMu_DQMOff.yaml'
+            config_file = topDir+'config_cards/full_ZToMuMu_DQMOff.yaml'
         elif args.channel == 'ZToEEDQMOff':
-            config_file = '../config_cards/full_ZToEE_DQMOff.yaml'
+            config_file = topDir+'config_cards/full_ZToEE_DQMOff.yaml'
         elif args.channel == 'ZToTauTauDQMOff':
-            config_file = '../config_cards/full_ZToTauTau_DQMOff.yaml'
+            config_file = topDir+'config_cards/full_ZToTauTau_DQMOff.yaml'
         elif args.channel == 'JetsDQMOff':
-            config_file = '../config_cards/full_Jet_DQMOff.yaml'
+            config_file = topDir+'config_cards/full_Jet_DQMOff.yaml'
 
 
     # Read config and set config_dict in helper

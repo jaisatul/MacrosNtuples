@@ -5,10 +5,13 @@ import os
 import sys
 import argparse
 
-sys.path.insert(0, '../helpers')
+#Get absolute location of code package
+topDir = os.getcwd().split('MacrosNtuples')[0]+'MacrosNtuples/'
+
+sys.path.insert(0, topDir+'helpers')
 from helper_L1Ntuples import *
 
-ROOT.gInterpreter.Declare('#include "../helper/Helper.h"')
+ROOT.gInterpreter.Declare('#include "'+topDir+'helper/Helper.h"')
 def main():
     parser = argparse.ArgumentParser(
         description='''L1 performance studies (turnons, scale/resolution/...)                                                                                                                                
