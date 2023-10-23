@@ -135,7 +135,9 @@ def main():
     df = df.Filter('Flag_HBHENoiseFilter&&Flag_HBHENoiseIsoFilter&&Flag_goodVertices&&Flag_EcalDeadCellTriggerPrimitiveFilter&&Flag_BadPFMuonFilter&&Flag_BadPFMuonDzFilter')
 
     # binning for run number
+    print('\n*** Setting bins for run number ...')
     h.set_runnb_bins(df)
+    print('... set.')
     
     if args.outputFile == '':
         args.outputFile = 'output_'+args.channel+'.root'
@@ -147,8 +149,10 @@ def main():
         return 
 
     # add nvtx histo
+    print('\n*** Writing nVtx histogram ...')
     nvtx_histo = df.Histo1D(ROOT.RDF.TH1DModel("h_nvtx" , "Number of reco vertices;N_{vtx};Events"  ,    100, 0., 100.), "PV_npvs")
     nvtx_histo.GetValue().Write()
+    print('... wrote.')
         
     if args.channel == 'PhotonJet':
         df = h.SinglePhotonSelection(df) 
@@ -301,20 +305,26 @@ def main():
             all_histos[i].GetValue().Write()
 
     if args.channel == 'ZToMuMu':
+        print('\nZToMuMu Hist production')
+        print('---------------------------------')
         df = h.ZMuMu_MuSelection(df)
+        print('*** ZMuMu_MuSelection complete ***')
 
         # make copies of df for each bin of nvtx (+1 copy of the original)
         df_list = [df.Filter(nvtx_cut) for nvtx_cut in filter_list]
         all_histos = {}
 
+        print('*** Generating histograms ***')
         for i, df_element in enumerate(df_list):
             df_element, histos = h.ZMuMu_Plots(df_element, suffix = suffix_list[i])
 
             for key, val in histos.items():
                 all_histos[key] = val
 
+        print('*** Writing histograms ***\n')
         for i in all_histos:
             all_histos[i].GetValue().Write()
+        print('\n*** All done! ***\n')
 
     if args.channel == 'ZToEEDQMOff':
 

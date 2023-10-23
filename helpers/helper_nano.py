@@ -15,7 +15,9 @@ def set_runnb_bins(df):
     if runnb_bins is None:
         # +1: to get [run, run+1] bin, +0.5 and floor to prevent float rounding errors + high bound
         # in range is excluded, so feed run, and run+2 to get [run, run+1]
+        print('Finding maximum run number:')
         runNb_max = ceil(df.Max("run").GetValue() + 1.5)
+        print('Finding minimum run number:')
         runNb_min = floor(df.Min("run").GetValue())
         runnb_bins = array('f', [r for r in range(runNb_min, runNb_max)])
     else:
