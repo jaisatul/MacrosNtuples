@@ -10,7 +10,10 @@ import pandas as pd
 from array import array
 from glob import glob
 
-ROOT.gInterpreter.Declare('#include "../helpers/Helper.h"')
+#Get absolute location of code package
+topDir = os.getcwd().split('MacrosNtuples')[0]+'MacrosNtuples/'
+
+ROOT.gInterpreter.Declare('#include "'+topDir+'helpers/Helper.h"')
 
 #A few global variables
 lumisection_in_seconds = 23.2
@@ -259,7 +262,7 @@ others_seeds = [
 ]
 
 dict_runls_to_pu = {}
-with open('../json_csv_files/run_lumi_pu_Fill8456.json', 'r', encoding='utf-8') as f_in:
+with open(topDir+'json_csv_files/run_lumi_pu_Fill8456.json', 'r', encoding='utf-8') as f_in:
     dict_runls_to_pu = json.load(f_in)
     
 
@@ -362,9 +365,11 @@ def main():
         usage='use "%(prog)s --help" for more information',
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("--max_events", dest="max_events", help="Maximum number of events to analyze. Default=-1 i.e. run on all events.", type=int, default=-1)
+    parser.add_argument("--print_events", dest="print_events", help="Print out every Nth event analyzed. Default=100000 i.e. print every 100k-th.", type=int\
+, default=100000)
     parser.add_argument("-i", "--input", dest="input_files", help="Input file", nargs='+', type=str, default=[])
     parser.add_argument("-o", "--output", dest="output_file", help="Output file", type=str, default='')
-    parser.add_argument("-m", "--l1menucsv", dest="l1menucsv", help="L1 Menu (.csv file)", type=str, default='../json_csv_files/L1Menu_Collisions2022_Fill8456.csv')
+    parser.add_argument("-m", "--l1menucsv", dest="l1menucsv", help="L1 Menu (.csv file)", type=str, default=topDir+'json_csv_files/L1Menu_Collisions2022_Fill8456.csv')
     parser.add_argument("-d", "--dataset", dest="dataset", help="Dataset (HLTPhysics or ZeroBias)", type=str, default='')
 
     args = parser.parse_args() 
@@ -551,7 +556,7 @@ def processfile(channel, input_file, max_events, str_l1finalor, h_allevents_vs_p
     '''
     
     #The next line does nothing, just prints a line every 100k events
-    df = df.Filter('if(tdfentry_ %100000 == 0) {cout << "Event is  " << tdfentry_ << endl;} return true;')
+    df = df.Filter('if(tdfentry_ %'+str(args.print_events)+' == 0) {cout << "Event is  " << tdfentry_ << endl;} return true;')
 
     #For HLT physics studies, only consider fill 8456. Ugly hardcoding for now. 
     if dataset == "HLTPhysics":
