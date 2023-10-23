@@ -143,7 +143,7 @@ def canvas(width=700, height=600, lmargin_frac=0.15, rmargin_frac=0.15):
     return c
 
 
-def drawplots(objs, legendlabels, xtitle='', ytitle='', ztitle='',  extralabel='', setlogx=False, plotname='plot', axisranges=[], saveplot=False, interactive=False, suffix_files = [], top_label='', legend_pos = "bottom", nvtx_suffix = "", dirname = 'plotsL1Run3'):
+def drawplots(objs, legendlabels, xtitle='', ytitle='', ztitle='',  extralabel='', setlogx=False, plotname='plot', axisranges=[], saveplot=False, saveroot=False, interactive=False, suffix_files = [], top_label='', legend_pos = "bottom", nvtx_suffix = "", dirname = 'plotsL1Run3'):
     ROOT.gStyle.SetOptStat(0)
     ROOT.gStyle.SetTextFont(42)
 
