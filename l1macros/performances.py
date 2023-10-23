@@ -5,13 +5,14 @@ import os
 import sys
 import argparse
 
-
+#Get absolute location of code package
+topDir = os.getcwd().split('MacrosNtuples')[0]+'MacrosNtuples/'
 
 #In case you want to load an helper for C++ functions
-ROOT.gInterpreter.Declare('#include "../helpers/Helper.h"')
-ROOT.gInterpreter.Declare('#include "../helpers/Helper_InvariantMass.h"')
+ROOT.gInterpreter.Declare('#include "'+topDir+'helpers/Helper.h"')
+ROOT.gInterpreter.Declare('#include "'+topDir+'helpers/Helper_InvariantMass.h"')
 #Importing stuff from other python files
-sys.path.insert(0, '../helpers')
+sys.path.insert(0, topDir+'helpers')
 
 from helper import * 
 
@@ -25,6 +26,7 @@ def main():
         usage='use "%(prog)s --help" for more information',
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("--max_events", dest="max_events", help="Maximum number of events to analyze. Default=-1 i.e. run on all events.", type=int, default=-1)
+    parser.add_argument("--print_events", dest="print_events", help="Print out every Nth event analyzed. Default=100000 i.e. print every 100k-th.", type=int, default=100000)
     parser.add_argument("-i", "--input", dest="inputFile", help="Input file", type=str, default='')
     parser.add_argument("-o", "--output", dest="outputFile", help="Output file", type=str, default='')
     parser.add_argument("-c", "--channel", dest="channel", help=
@@ -83,7 +85,7 @@ def main():
     max_events = min(nEvents, args.max_events) if args.max_events >=0 else nEvents
     df = df.Range(0, max_events)
     #Next line to monitor event loop progress
-    df = df.Filter('if(tdfentry_ %100000 == 0) {cout << "Event is  " << tdfentry_ << endl;} return true;')
+    df = df.Filter('if(tdfentry_ %'+str(args.print_events)+' == 0) {cout << "Event is  " << tdfentry_ << endl;} return true;')
 
     #Apply MET filters
     df = df.Filter('Flag_HBHENoiseFilter&&Flag_HBHENoiseIsoFilter&&Flag_goodVertices&&Flag_EcalDeadCellTriggerPrimitiveFilter&&Flag_BadPFMuonFilter&&Flag_BadPFMuonDzFilter')

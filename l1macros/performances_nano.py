@@ -4,13 +4,14 @@ import os
 import sys
 import argparse
 
-
+#Get absolute location of code package
+topDir = os.getcwd().split('MacrosNtuples')[0]+'MacrosNtuples/'
 
 #In case you want to load an helper for C++ functions
-ROOT.gInterpreter.Declare('#include "../helpers/Helper.h"')
-ROOT.gInterpreter.Declare('#include "../helpers/Helper_InvariantMass.h"')
+ROOT.gInterpreter.Declare('#include "'+topDir+'helpers/Helper.h"')
+ROOT.gInterpreter.Declare('#include "'+topDir+'helpers/Helper_InvariantMass.h"')
 #Importing stuff from other python files
-sys.path.insert(0, '../helpers')
+sys.path.insert(0, topDir+'helpers')
 
 #from helper_nano import * 
 import helper_nano as h
@@ -25,6 +26,7 @@ def main():
         usage='use "%(prog)s --help" for more information',
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("--max_events", dest="max_events", help="Maximum number of events to analyze. Default=-1 i.e. run on all events.", type=int, default=-1)
+    parser.add_argument("--print_events", dest="print_events", help="Print out every Nth event analyzed. Default=100000 i.e. print every 100k-th.", type=int, default=100000)
     parser.add_argument("-i", "--input", dest="inputFile", help="Input file", type=str, default='')
     parser.add_argument("-o", "--output", dest="outputFile", help="Output file", type=str, default='')
     parser.add_argument("-g", "--golden", dest="golden", help="Golden JSON file to use", type = str, default = '')
@@ -70,24 +72,24 @@ def main():
     config_file = args.config
     if config_file == '':
         if args.channel == 'PhotonJet':
-            config_file = '../config_cards/full_PhotonJet.yaml'
+            config_file = topDir+'config_cards/full_PhotonJet.yaml'
         elif args.channel == 'MuonJet':
-            config_file = '../config_cards/full_MuonJet.yaml'
+            config_file = topDir+'config_cards/full_MuonJet.yaml'
         elif args.channel == 'ZToMuMu':
-            config_file = '../config_cards/full_ZToMuMu.yaml'
+            config_file = topDir+'config_cards/full_ZToMuMu.yaml'
         elif args.channel == 'ZToEE':
-            config_file = '../config_cards/full_ZToEE.yaml'
+            config_file = topDir+'config_cards/full_ZToEE.yaml'
         elif args.channel == 'ZToTauTau':
-            config_file = '../config_cards/full_ZToTauTau.yaml'
+            config_file = topDir+'config_cards/full_ZToTauTau.yaml'
         ## For DQM Offline plots
         elif args.channel == 'ZToMuMuDQMOff':
-            config_file = '../config_cards/full_ZToMuMu_DQMOff.yaml'
+            config_file = topDir+'config_cards/full_ZToMuMu_DQMOff.yaml'
         elif args.channel == 'ZToEEDQMOff':
-            config_file = '../config_cards/full_ZToEE_DQMOff.yaml'
+            config_file = topDir+'config_cards/full_ZToEE_DQMOff.yaml'
         elif args.channel == 'ZToTauTauDQMOff':
-            config_file = '../config_cards/full_ZToTauTau_DQMOff.yaml'
+            config_file = topDir+'config_cards/full_ZToTauTau_DQMOff.yaml'
         elif args.channel == 'JetsDQMOff':
-            config_file = '../config_cards/full_Jet_DQMOff.yaml'
+            config_file = topDir+'config_cards/full_Jet_DQMOff.yaml'
 
 
     # Read config and set config_dict in helper
@@ -127,13 +129,15 @@ def main():
     max_events = min(nEvents, args.max_events) if args.max_events >=0 else nEvents
     df = df.Range(0, max_events)
     #Next line to monitor event loop progress
-    df = df.Filter('if(tdfentry_ %100000 == 0) {cout << "Event is  " << tdfentry_ << endl;} return true;')
+    df = df.Filter('if(tdfentry_ %'+str(args.print_events)+' == 0) {cout << "Event is  " << tdfentry_ << endl;} return true;')
 
     #Apply MET filters
     df = df.Filter('Flag_HBHENoiseFilter&&Flag_HBHENoiseIsoFilter&&Flag_goodVertices&&Flag_EcalDeadCellTriggerPrimitiveFilter&&Flag_BadPFMuonFilter&&Flag_BadPFMuonDzFilter')
 
     # binning for run number
+    print('\n*** Setting bins for run number ...')
     h.set_runnb_bins(df)
+    print('... set.')
     
     if args.outputFile == '':
         args.outputFile = 'output_'+args.channel+'.root'
@@ -145,8 +149,10 @@ def main():
         return 
 
     # add nvtx histo
+    print('\n*** Writing nVtx histogram ...')
     nvtx_histo = df.Histo1D(ROOT.RDF.TH1DModel("h_nvtx" , "Number of reco vertices;N_{vtx};Events"  ,    100, 0., 100.), "PV_npvs")
     nvtx_histo.GetValue().Write()
+    print('... wrote.')
         
     if args.channel == 'PhotonJet':
         df = h.SinglePhotonSelection(df) 
@@ -299,20 +305,26 @@ def main():
             all_histos[i].GetValue().Write()
 
     if args.channel == 'ZToMuMu':
+        print('\nZToMuMu Hist production')
+        print('---------------------------------')
         df = h.ZMuMu_MuSelection(df)
+        print('*** ZMuMu_MuSelection complete ***')
 
         # make copies of df for each bin of nvtx (+1 copy of the original)
         df_list = [df.Filter(nvtx_cut) for nvtx_cut in filter_list]
         all_histos = {}
 
+        print('*** Generating histograms ***')
         for i, df_element in enumerate(df_list):
             df_element, histos = h.ZMuMu_Plots(df_element, suffix = suffix_list[i])
 
             for key, val in histos.items():
                 all_histos[key] = val
 
+        print('*** Writing histograms ***\n')
         for i in all_histos:
             all_histos[i].GetValue().Write()
+        print('\n*** All done! ***\n')
 
     if args.channel == 'ZToEEDQMOff':
 
