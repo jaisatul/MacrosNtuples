@@ -38,7 +38,8 @@ def main():
                         -ZToMuMuDQMOff: For Offline DQM L1 muon studies with Z->mumu
                         -ZToEEDQMOff: For Offline DQM L1 EG studies with Z->ee
                         -ZToTauTauDQMOff: For Offline DQM L1 EG studies with Z->tautau
-                        -JetsDQMOff: For Offline DQM Jet studies''', 
+                        -JetsDQMOff: For Offline DQM Jet studies
+                        -EtSumDQMOff: For Offline DQM EtSum studies''', 
                         type=str, default='PhotonJet')
     parser.add_argument("--config", dest="config", help="Yaml configuration file to read. Default: full config for that channel.", type=str, default='')
     #parser.add_argument("--plot_nvtx", dest="plot_nvtx", help="Whether to save additional plots in bins of nvtx. Boolean, default = False", type=bool, default=False)
@@ -88,6 +89,8 @@ def main():
             config_file = '../config_cards/full_ZToTauTau_DQMOff.yaml'
         elif args.channel == 'JetsDQMOff':
             config_file = '../config_cards/full_Jet_DQMOff.yaml'
+        elif args.channel == 'EtSumDQMOff':
+            config_file = '../config_cards/full_EtSum_DQMOff.yaml'
 
 
     # Read config and set config_dict in helper
@@ -140,7 +143,7 @@ def main():
     out = ROOT.TFile(args.outputFile, "recreate")
     ####The sequence of filters/column definition starts here
     
-    if args.channel not in ['PhotonJet','MuonJet','ZToMuMu','ZToEE','ZToTauTau', 'ZToMuMuDQMOff','ZToEEDQMOff','ZToTauTauDQMOff', 'JetsDQMOff']:
+    if args.channel not in ['PhotonJet','MuonJet','ZToMuMu','ZToEE','ZToTauTau', 'ZToMuMuDQMOff','ZToEEDQMOff','ZToTauTauDQMOff', 'JetsDQMOff', 'EtSumDQMOff']:
         print("Channel {} does not exist".format(args.channel))
         return 
 
@@ -364,6 +367,20 @@ def main():
 
         all_histos = {}
         df, histos = h.Jet_DQMOff_Plots(df, suffix = '')
+        for key, val in histos.items():
+            all_histos[key] = val
+
+        for i in all_histos:
+            all_histos[i].GetValue().Write()
+
+    if args.channel == 'EtSumDQMOff':
+
+        print('EtSum DQM Offline Hist production')
+        print('---------------------------------')
+        df = h.DQMOff_EtSumSelection(df)
+
+        all_histos = {}
+        df, histos = h.EtSum_DQMOff_Plots(df, suffix = '')
         for key, val in histos.items():
             all_histos[key] = val
 

@@ -82,3 +82,15 @@ dqmoff_jetpt_bins = array('f', dqmoff_jetpt_bins)
 dqmoff_jetresolution_pt_bins = array('f', [-1.0 + i * 0.05 for i in range(51)])
 dqmoff_jetresolution_eta_bins = array('f', [-0.3 + i * 0.005 for i in range(121)])
 dqmoff_jetresolution_phi_bins = array('f', [-0.3 + i * 0.005 for i in range(121)])
+
+# bins used for dqm offline etsum plots -----------
+dqmoff_etsum_bins = list( 
+	itertools.chain(
+		range(0, 40, 4), range(40, 70, 2), range(70, 100, 5),
+		range(100, 160, 10), range(160, 261, 20)
+	)
+)
+dqmoff_etsum_bins = array('f', dqmoff_etsum_bins)
+
+dqmoff_etsumresolution_pt_bins = array('f', [-1.0 + i * 0.05 for i in range(71)])
+dqmoff_etsumresolution_phi_bins = array('f', [-1.0 + i * 0.01 for i in range(201)])

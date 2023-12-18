@@ -130,6 +130,24 @@ vector<int> FindL1JetIdx_DQMOff_setBx(ROOT::VecOps::RVec<float>L1Obj_eta, ROOT::
 
 // ==========================================
 
+int FindL1EtSumIdx_DQMOff_setBx(ROOT::VecOps::RVec<float>L1Obj_etSumType, ROOT::VecOps::RVec<float>L1Obj_bx, int etSumType, int bx, ROOT::VecOps::RVec<int>L1Obj_CutVar={}, int CutVar=-1){
+  int idx = -1;
+  for(unsigned int j = 0; j<L1Obj_etSumType.size(); j++){
+
+    if(L1Obj_CutVar.size()==L1Obj_etSumType.size()){
+      if(L1Obj_CutVar[j]<CutVar) continue;
+    }
+    if(L1Obj_bx[j] != bx || L1Obj_etSumType[j] != etSumType) {
+      continue;
+    }
+    idx = j;
+    break;
+  }
+  return idx;
+}
+
+// ==========================================
+
 vector<int> FindL1MuIdx(ROOT::VecOps::RVec<float>L1Obj_eta, ROOT::VecOps::RVec<float>L1Obj_phi, ROOT::VecOps::RVec<float>recoObj_Eta, ROOT::VecOps::RVec<float>recoObj_Phi, 
         ROOT::VecOps::RVec<float>recoObj_Pt, ROOT::VecOps::RVec<int>charge, ROOT::VecOps::RVec<int>L1Obj_CutVar={}, int CutVar=-1){
   vector <int> result={};
@@ -515,40 +533,34 @@ vector<int> MatchObjToTrig(ROOT::VecOps::RVec<float>Obj_eta, ROOT::VecOps::RVec<
              idx = j;
           }
       }
-    }
-
-    
+    }    
     result.push_back(idx);
   }
   return result;
 }
 
-vector<int> MatchObjToTrig_DQMOff(ROOT::VecOps::RVec<float>Obj_eta, ROOT::VecOps::RVec<float>Obj_phi, ROOT::VecOps::RVec<float>TrigObj_pt, ROOT::VecOps::RVec<float>TrigObj_eta, ROOT::VecOps::RVec<float>TrigObj_phi, ROOT::VecOps::RVec<int>TrigObj_id, int Target_id, ROOT::VecOps::RVec<int>filterBits){
+vector<int> MatchObjToTrig_DQMOff(ROOT::VecOps::RVec<float>Obj_eta, ROOT::VecOps::RVec<float>Obj_phi, ROOT::VecOps::RVec<float>TrigObj_pt, ROOT::VecOps::RVec<float>TrigObj_eta, ROOT::VecOps::RVec<float>TrigObj_phi, ROOT::VecOps::RVec<int>TrigObj_id, int Target_id, ROOT::VecOps::RVec<int>filterBits, int filterBitIdx, float dRminimum, float trigObjPtCut = -1.){
 
   vector <int> result={};
-  for(unsigned int i = 0; i<Obj_eta.size(); i++){
-    //double drmin = 0.4; 
-    double drmin = 0.1; 
+  for(unsigned int i = 0; i<Obj_eta.size(); i++){ 
+    double drmin = dRminimum;
     int idx = -1;
-    //vector<int> idx = {};
-    //vector<double> dr_vec = {};
 
     for(unsigned int j = 0; j<TrigObj_eta.size(); j++){
       if (TrigObj_id[j] != Target_id) continue;
+      if (TrigObj_pt[j] < trigObjPtCut) continue;
 
       double deta = abs(TrigObj_eta[j]-Obj_eta[i]);
       //double dphi = deltaphi_offlinemustation2_l1mu(Muon_charge[i], TrigObj_pt[j], TrigObj_eta[j], TrigObj_phi[j], Muon_phi[i]);
       double dphi = abs(acos(cos(TrigObj_phi[j]-Obj_phi[i]))); 
       double dr = sqrt(deta*deta+dphi*dphi);
       if(dr<=drmin){ 
-          if((filterBits[j]>>1&1) == 1){
+          if((filterBits[j]>>filterBitIdx&1) == 1){
              drmin = dr; 
              idx = j;
           }
       }
-    }
-
-    
+    }    
     result.push_back(idx);
   }
   return result;
@@ -562,6 +574,20 @@ ROOT::VecOps::RVec <Bool_t> trig_is_filterbit1_set(ROOT::VecOps::RVec<int>Trig_i
         else {
             int idx = Trig_idx[i];
             if((filterBits[idx]>>1&1) == 1) result.push_back(true);
+            else result.push_back(false);
+        }
+    }
+    return result;
+}
+
+// Recover triger decision from filterbit
+ROOT::VecOps::RVec <Bool_t> trig_is_filterbit_set_DQMOff(ROOT::VecOps::RVec<int>Trig_idx, ROOT::VecOps::RVec<int>filterBits, int filterBitIdx){
+    vector <bool> result = {};
+    for( unsigned int i = 0; i < Trig_idx.size(); i++){
+        if (Trig_idx[i] == -1) result.push_back(false);
+        else {
+            int idx = Trig_idx[i];
+            if((filterBits[idx]>>filterBitIdx&1) == 1) result.push_back(true);
             else result.push_back(false);
         }
     }

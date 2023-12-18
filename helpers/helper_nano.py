@@ -302,8 +302,8 @@ def DQMOff_EleSelection(df):
 
     # TrigObj matching
     df = df.Filter('nElectron > 2')
-    df = df.Define('Electron_trig_idx', 'MatchObjToTrig(Electron_eta, Electron_phi, TrigObj_pt, TrigObj_eta, TrigObj_phi, TrigObj_id, 11, TrigObj_filterBits)')
-    df = df.Define('Electron_passHLT_Ele32_WPTight_Gsf', 'trig_is_filterbit1_set(Electron_trig_idx, TrigObj_filterBits)')
+    df = df.Define('Electron_trig_idx', 'MatchObjToTrig_DQMOff(Electron_eta, Electron_phi, TrigObj_pt, TrigObj_eta, TrigObj_phi, TrigObj_id, 11, TrigObj_filterBits, 1, 0.3)')
+    df = df.Define('Electron_passHLT_Ele32_WPTight_Gsf', 'trig_is_filterbit_set_DQMOff(Electron_trig_idx, TrigObj_filterBits, 1)')
 
     df = df.Define('isTag','Electron_pt>30&&abs(Electron_pdgId)==11&&Electron_mvaNoIso_WP90&&Electron_passHLT_Ele32_WPTight_Gsf==true')
     df = df.Filter('Sum(isTag)>0')
@@ -354,8 +354,8 @@ def DQMOff_MuSelection(df):
     ''')
 
     # TrigObj matching
-    df = df.Define('Muon_trig_idx', 'MatchObjToTrig_DQMOff(Muon_eta, Muon_phi, TrigObj_pt, TrigObj_eta, TrigObj_phi, TrigObj_id, 13, TrigObj_filterBits)')
-    df = df.Define('Muon_passHLT_IsoMu27', 'trig_is_filterbit1_set(Muon_trig_idx, TrigObj_filterBits)')
+    df = df.Define('Muon_trig_idx', 'MatchObjToTrig_DQMOff(Muon_eta, Muon_phi, TrigObj_pt, TrigObj_eta, TrigObj_phi, TrigObj_id, 13, TrigObj_filterBits, 3, 0.1)')
+    df = df.Define('Muon_passHLT_IsoMu27', 'trig_is_filterbit_set_DQMOff(Muon_trig_idx, TrigObj_filterBits, 3)')
     df = df.Define('Muon_PassTightId','Muon_tightId') 
 
     df = df.Define('isTag','Muon_pt>26&&abs(Muon_pdgId)==13&&Muon_PassTightId&&Muon_passHLT_IsoMu27')
@@ -390,7 +390,7 @@ def DQMOff_TauSelection(df):
     Selects Z->tautau events passing a single muon trigger. Defines probe tau pt/eta/phi
     The selections are made to match with DQM Off selections
     '''
-    df = df.Filter('HLT_IsoMu24')
+    df = df.Filter('HLT_IsoMu20')
 
     # Trigged on a Muon (probably redundant)
     df = df.Filter('''
@@ -412,8 +412,8 @@ def DQMOff_TauSelection(df):
     # --------------------------------------------------------
 
     # TrigObj matching
-    df = df.Define('Muon_trig_idx', 'MatchObjToTrig(Muon_eta, Muon_phi, TrigObj_pt, TrigObj_eta, TrigObj_phi, TrigObj_id, 13, TrigObj_filterBits)')
-    df = df.Define('Muon_passHLT_IsoMu24', 'trig_is_filterbit1_set(Muon_trig_idx, TrigObj_filterBits)')
+    df = df.Define('Muon_trig_idx', 'MatchObjToTrig_DQMOff(Muon_eta, Muon_phi, TrigObj_pt, TrigObj_eta, TrigObj_phi, TrigObj_id, 13, TrigObj_filterBits, 3, 0.6)')
+    df = df.Define('Muon_passHLT_IsoMu24', 'trig_is_filterbit_set_DQMOff(Muon_trig_idx, TrigObj_filterBits, 3)')
 
     df = df.Define('Muon_PassTightId','Muon_pfIsoId>=3&&Muon_mediumPromptId') 
     df = df.Define('Muon_MassId', 'pass_muon_met_mass_below30(Muon_pt, Muon_phi, MET_pt, MET_phi)')
@@ -474,6 +474,20 @@ def DQMOff_JetSelection(df):
     df = df.Define('leadJetPt', 'Jet_pt[isLead]')
     df = df.Define('leadJetEta','Jet_eta[isLead]')
     df = df.Define('leadJetPhi','Jet_phi[isLead]')
+
+    return df
+
+def DQMOff_EtSumSelection(df):
+    '''
+    Selects events passing a single muon trigger. Defines Et sums
+    The selections are made to match with DQM Off selections
+    '''
+
+    df = df.Filter('HLT_IsoMu20') # Add a condition to include all the HLT filters if they exist otherwise not 
+
+    df = df.Define('recoMET', 'CaloMET_pt')
+    df = df.Define('recoMETPhi','CaloMET_phi')
+    df = df.Define('recoMETSumEt', 'CaloMET_sumEt')
 
     return df
 
@@ -1204,6 +1218,11 @@ def Jet_DQMOff_Plots(df, suffix = ''):
     df_jet = df_jet.Define('lead_L1JetPhi', 'GetVal(lead_idxL1Jet, L1Jet_phi)')
     df_jet = df_jet.Define('lead_L1JetBx', 'GetVal(lead_idxL1Jet, L1Jet_bx)')
 
+    # TrigObj matching
+    df_jet = df_jet.Define('LeadJet_trig_idx', 'MatchObjToTrig_DQMOff(lead_L1JetEta, lead_L1JetPhi, TrigObj_pt, TrigObj_eta, TrigObj_phi, TrigObj_id, 1, TrigObj_filterBits, 3, 0.3, 27)')
+    df_jet = df_jet.Define('LeadJet_matchHLT', 'trig_is_filterbit_set_DQMOff(LeadJet_trig_idx, TrigObj_filterBits, 3)')
+    df_jet = df_jet.Filter('Sum(LeadJet_matchHLT)==0')
+
     df_jet = df_jet.Define('lead_L1PtReso', '(lead_L1JetPt - leadJetPt)/leadJetPt')
     df_jet = df_jet.Define('lead_L1EtaReso', '(lead_L1JetEta - leadJetEta)')
     df_jet = df_jet.Define('lead_L1PhiReso', 'GetReducedDeltaphi(lead_L1JetPhi, leadJetPhi)')
@@ -1271,6 +1290,63 @@ def Jet_DQMOff_Plots(df, suffix = ''):
 
     return df, histos
 
+
+def EtSum_DQMOff_Plots(df, suffix = ''):
+
+    histos = {}
+    prefix = ''
+
+    df_met = df.Define('idxL1MET', 'FindL1EtSumIdx_DQMOff_setBx(L1EtSum_etSumType, L1EtSum_bx, 2, 0)')
+    df_met = df_met.Define('L1MET', 'L1EtSum_pt[idxL1MET]')
+    df_met = df_met.Define('L1METPhi', 'L1EtSum_phi[idxL1MET]')
+
+    df_met = df_met.Define('reso_met', '(L1MET - recoMET)/recoMET')
+    df_met = df_met.Define('reso_phi', 'L1METPhi - recoMETPhi')
+
+    met_binning = dqmoff_etsum_bins
+    n_metbins = len(met_binning) - 1
+
+    reso_pt_binning = dqmoff_etsumresolution_pt_bins
+    reso_phi_binning = dqmoff_etsumresolution_phi_bins
+
+    n_resoptbins = len(reso_pt_binning) - 1
+    n_resophibins = len(reso_phi_binning) - 1
+
+    if config['L1TResolution']:
+
+        # Create resolution histograms
+        histos['reso_pt_'+prefix+'_'+suffix] = df_met.Histo1D (
+            ROOT.RDF.TH1DModel('h_EtSum_reso_met_{}'.format(prefix)+suffix, '', n_resoptbins, reso_pt_binning), 
+            'reso_met'
+        )
+        histos['reso_phi_'+prefix+'_'+suffix] = df_met.Histo1D (
+            ROOT.RDF.TH1DModel('h_EtSum_reso_phi_{}'.format(prefix)+suffix, '', n_resophibins, reso_phi_binning), 
+            'reso_phi'
+        )
+
+    if config['L1TEfficiency']:
+
+        # df_met = df_met.Define('denominator_met', 'recoMET')
+
+        # Create denominator histograms for pt
+        histos['eff_met_'+prefix+'_'+suffix] = df_met.Histo1D (
+            ROOT.RDF.TH1DModel('h_EtSum_eff_met_{}'.format(prefix)+suffix, '', n_metbins, met_binning), 
+            'recoMET'
+        )
+
+        # Numerator Histograms for all Et thresholds
+        l1thresholds = config["Thresholds"]
+        for imet in l1thresholds:
+            df_loc = df_met.Define('passL1Cond', 'L1MET>={}'.format(imet))
+            # df_loc = df_loc.Define('numerator_met', 'recoMET[passL1Cond]')
+
+            str_binPt = "l1thrgeq{}".format(imet).replace(".","p") 
+            histos['eff_met_'+str_binPt+'_'+prefix+'_'+suffix] = df_loc.Filter('passL1Cond').Histo1D (
+                ROOT.RDF.TH1DModel('h_EtSum_eff_met_{}_{}'.format(str_binPt, prefix)+suffix, '', n_metbins, met_binning), 
+                'recoMET'
+            )
+
+    return df, histos
 
     
 def CleanJets(df):
