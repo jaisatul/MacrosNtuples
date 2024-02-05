@@ -5,7 +5,7 @@ jetEtaBins = [0., 1.3, 2.5, 3., 3.5, 4., 5.]
 egEtaBins = [0., 1.479, 2.5]
 muEtaBins = [0., 0.83, 1.24, 2.4]
 muEMTFBins = [1.24, 1.6, 2.1, 2.4]
-tauEtaBins = [0., 1.5, 2.1]
+# tauEtaBins = [0., 1.5, 2.1]
 
 
 ht_bins = array('f', [ i*10 for i in range(50) ] + [ 500+ i*20 for i in range(25) ] + [1000 + i*50 for i in range(10)] +[1500,1600,1700,1800,2000,2500,3000])

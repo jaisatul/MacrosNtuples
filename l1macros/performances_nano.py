@@ -12,7 +12,6 @@ ROOT.gInterpreter.Declare('#include "../helpers/Helper_InvariantMass.h"')
 #Importing stuff from other python files
 sys.path.insert(0, '../helpers')
 
-#from helper_nano import * 
 import helper_nano as h
 
 
@@ -34,12 +33,7 @@ def main():
                         -MuonJet: For L1 jet studies with events trigger with a SingleMuon trigger
                         -ZToMuMu: For L1 muon studies with Z->mumu
                         -ZToEE: For L1 EG studies with Z->ee
-                        -ZToTauTau: For L1 EG studies with Z->tautau
-                        -ZToMuMuDQMOff: For Offline DQM L1 muon studies with Z->mumu
-                        -ZToEEDQMOff: For Offline DQM L1 EG studies with Z->ee
-                        -ZToTauTauDQMOff: For Offline DQM L1 EG studies with Z->tautau
-                        -JetsDQMOff: For Offline DQM Jet studies
-                        -EtSumDQMOff: For Offline DQM EtSum studies''', 
+                        ''', 
                         type=str, default='PhotonJet')
     parser.add_argument("--config", dest="config", help="Yaml configuration file to read. Default: full config for that channel.", type=str, default='')
     #parser.add_argument("--plot_nvtx", dest="plot_nvtx", help="Whether to save additional plots in bins of nvtx. Boolean, default = False", type=bool, default=False)
@@ -63,9 +57,6 @@ def main():
         elif args.channel == 'ZToEE':
             #inputFile = '/user/lathomas/Public/L1Studies/ZToEE.root'
             inputFile = '/pnfs/iihe/cms/ph/sc4/store/data/Run2023C/EGamma0/NANOAOD/PromptNanoAODv11p9_v1-v1/70000/3b1e99a5-71a0-46ee-b720-b79669f60029.root'
-        elif args.channel == 'ZToTauTau' :
-            #inputFile = '/pnfs/iihe/cms/ph/sc4/store/data/Run2023C/Muon1/NANOAOD/PromptNanoAODv11p9_v1-v1/60000/37c190ac-242c-47d7-a98f-9c51b111ff00.root'
-            inputFile = '/pnfs/iihe/cms/ph/sc4/store/data/Run2023C/Muon1/NANOAOD/PromptNanoAODv12_v2-v2/60000/ee7372a9-da2d-4b3e-8a0e-3cba6d2272a5.root'  ## Have to change this
 
     ### Set default config file
     config_file = args.config
@@ -78,19 +69,6 @@ def main():
             config_file = '../config_cards/full_ZToMuMu.yaml'
         elif args.channel == 'ZToEE':
             config_file = '../config_cards/full_ZToEE.yaml'
-        elif args.channel == 'ZToTauTau':
-            config_file = '../config_cards/full_ZToTauTau.yaml'
-        ## For DQM Offline plots
-        elif args.channel == 'ZToMuMuDQMOff':
-            config_file = '../config_cards/full_ZToMuMu_DQMOff.yaml'
-        elif args.channel == 'ZToEEDQMOff':
-            config_file = '../config_cards/full_ZToEE_DQMOff.yaml'
-        elif args.channel == 'ZToTauTauDQMOff':
-            config_file = '../config_cards/full_ZToTauTau_DQMOff.yaml'
-        elif args.channel == 'JetsDQMOff':
-            config_file = '../config_cards/full_Jet_DQMOff.yaml'
-        elif args.channel == 'EtSumDQMOff':
-            config_file = '../config_cards/full_EtSum_DQMOff.yaml'
 
 
     # Read config and set config_dict in helper
@@ -313,76 +291,6 @@ def main():
 
             for key, val in histos.items():
                 all_histos[key] = val
-
-        for i in all_histos:
-            all_histos[i].GetValue().Write()
-
-    if args.channel == 'ZToEEDQMOff':
-
-        print('Electron DQM Offline Hist production')
-        print('---------------------------------')
-        df = h.DQMOff_EleSelection(df)
-
-        all_histos = {}        
-        df, histos = h.ZEE_DQMOff_Plots(df, suffix = '')
-        for key, val in histos.items():
-            all_histos[key] = val
-
-        for i in all_histos:
-            all_histos[i].GetValue().Write()
-
-    if args.channel == 'ZToMuMuDQMOff':
-
-        print('Muon DQM Offline Hist production')
-        print('---------------------------------')
-        df = h.DQMOff_MuSelection(df)
-
-        all_histos = {}        
-        df, histos = h.ZMuMu_DQMOff_Plots(df, suffix = '')
-        for key, val in histos.items():
-            all_histos[key] = val
-
-        for i in all_histos:
-            all_histos[i].GetValue().Write()
-
-    if args.channel == 'ZToTauTauDQMOff':
-
-        print('Tau DQM Offline Hist production')
-        print('---------------------------------')
-        df = h.DQMOff_TauSelection(df)
-
-        all_histos = {}
-        df, histos = h.ZTauTau_DQMOff_Plots(df, suffix = '')
-        for key, val in histos.items():
-            all_histos[key] = val
-
-        for i in all_histos:
-            all_histos[i].GetValue().Write()
-
-    if args.channel == 'JetsDQMOff':
-
-        print('Jet DQM Offline Hist production')
-        print('---------------------------------')
-        df = h.DQMOff_JetSelection(df)
-
-        all_histos = {}
-        df, histos = h.Jet_DQMOff_Plots(df, suffix = '')
-        for key, val in histos.items():
-            all_histos[key] = val
-
-        for i in all_histos:
-            all_histos[i].GetValue().Write()
-
-    if args.channel == 'EtSumDQMOff':
-
-        print('EtSum DQM Offline Hist production')
-        print('---------------------------------')
-        df = h.DQMOff_EtSumSelection(df)
-
-        all_histos = {}
-        df, histos = h.EtSum_DQMOff_Plots(df, suffix = '')
-        for key, val in histos.items():
-            all_histos[key] = val
 
         for i in all_histos:
             all_histos[i].GetValue().Write()
