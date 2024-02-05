@@ -1,0 +1,50 @@
+#################################################################
+# Script to be executed on the node.                            #
+# "exe.sh" will be modified from the SubmitToHTCondor.sh script #
+#################################################################
+executable            		= exe.sh
+
+#############################################  
+# Definition of output, error and log files # 
+#############################################
+output                		= output/$(ClusterId)$(ProcId).out
+error                 		= error/$(ClusterId)$(ProcId).err
+log                   		= log/$(ClusterId).log
+
+################################################################################
+# Input files need to be transferred to the node.                              #
+# $filename is assigned the value of one of the file names for each job queued #
+################################################################################
+transfer_input_files            = $(filename)
+
+##############################################################################
+# Arguments for the executable script                                        #
+# $1 = $filename = for the input file (as explained above)                   #                                          
+# $2 = "path_to_output" will be modified from the SubmitToHTCondor.sh script #
+##############################################################################
+arguments                       = $(filename) path_to_output/output_$(ClusterId)$(ProcId).root
+
+###########################################################
+# Output files to the submit machine (Default is ON_EXIT) #
+# ON_SUCCESS means if the success_exit_code=0             #
+###########################################################
+# should_transfer_files = no
+# when_to_transfer_output       = ON_SUCCESS
+# when_to_transfer_output       = ON_EXIT
+
+###############################
+# Job flavor definitions :    #
+# espresso     = 20 minutes   # 
+# microcentury = 1 hour       #
+# longlunch    = 2 hour       #
+# workday      = 8 hour       #
+# tomorrow     = 1 day        #
+# testmatch    = 3 days       #
+# nextweek     = 1 week       #
+###############################
+# +JobFlavour           	= microcentury
+
+######################################################################################################
+# Job submission : one job per file "list_of_files" will be modified from SubmitToHTCondor.sh script #
+######################################################################################################
+queue filename matching files list_of_files

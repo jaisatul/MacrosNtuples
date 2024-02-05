@@ -29,8 +29,9 @@ def main():
     parser.add_argument("-o", "--output", dest="outputFile", help="Output file", type=str, default='')
     parser.add_argument("-c", "--channel", dest="channel", help=
                         '''Set channel and analysis:
-                        -PhotonJet: For L1 jet studies with events trigger with a SinglePhoton trigger
-                        -MuonJet: For L1 jet studies with events trigger with a SingleMuon trigger
+                        -PhotonJet: For L1 jet studies with events triggered with a SinglePhoton trigger
+                        -DiJet: For L1 jet studies with events triggered with a SingleJet trigger
+                        -MuonJet: For L1 jet studies with events triggered with a SingleMuon trigger
                         -ZToMuMu: For L1 muon studies with Z->mumu
                         -ZToEE: For L1 EG studies with Z->ee''', 
                         type=str, default='PhotonJet')
@@ -44,6 +45,8 @@ def main():
     if inputFile == '':
         if args.channel == 'PhotonJet':
             inputFile = '/user/lathomas/Public/L1Studies/PhotonJet.root'
+        elif args.channel == 'DiJet':
+            inputFile = '/user/lathomas/Public/L1Studies/DiJet.root'
         elif args.channel == 'MuonJet':
             inputFile = '/user/lathomas/Public/L1Studies/MuJet.root'
         elif args.channel == 'ZToMuMu':
@@ -150,7 +153,7 @@ def main():
 #        
 #        df, histos_balance = AnalyzePtBalance(df)
 #        
-#        df_report = df.Report()
+        df_report = df.Report()
 #        
 #        df, histos_hf = HFNoiseStudy(df)
 #
@@ -164,7 +167,7 @@ def main():
 #            
 #        for i in histos_hf:
 #            histos_hf[i].GetValue().Write()
-#        df_report.Print()
+        df_report.Print()
         
         
     if args.channel == 'MuonJet':

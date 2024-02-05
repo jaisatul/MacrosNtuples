@@ -451,12 +451,12 @@ def ZMuMu_Plots(df, suffix = ''):
 
             #
 
-            histos['L1Mu22_FirstBunchInTrain_bx0_etaphi'+suffix] = df_mu[i].Filter("_runNb>=361468").Filter("passL1_Initial_bx0[473]").Histo2D(ROOT.RDF.TH2DModel('L1Mu22_FirstBunchInTrain_bx0_etaphi'+suffix, '', 100, -5,5, 100, -3.1416, 3.1416), 'probeL1Mu22Bx0_Eta', 'probeL1Mu22Bx0_Phi')
-            histos['L1Mu22_FirstBunchInTrain_bx0_eta'+suffix] = df_mu[i].Filter("_runNb>=361468").Filter("passL1_Initial_bx0[473]").Histo1D(ROOT.RDF.TH1DModel('L1Mu22_FirstBunchInTrain_bx0_eta'+suffix, '', 100, -5, 5), 'probeL1Mu22Bx0_Eta') 
+            histos['L1Mu22_FirstBunchInTrain_bx0_etaphi'+suffix] = df_mu[i].Filter("passL1_Final_bxmin1[472]").Histo2D(ROOT.RDF.TH2DModel('L1Mu22_FirstBunchInTrain_bx0_etaphi'+suffix, '', 100, -5,5, 100, -3.1416, 3.1416), 'probeL1Mu22Bx0_Eta', 'probeL1Mu22Bx0_Phi')
+            histos['L1Mu22_FirstBunchInTrain_bx0_eta'+suffix] = df_mu[i].Filter("passL1_Final_bxmin1[472]").Histo1D(ROOT.RDF.TH1DModel('L1Mu22_FirstBunchInTrain_bx0_eta'+suffix, '', 100, -5, 5), 'probeL1Mu22Bx0_Eta') 
 
-            histos['L1Mu22_FirstBunchInTrain_bxmin1_etaphi'+suffix] = df_mu[i].Filter("_runNb>=361468").Filter("passL1_Initial_bx0[473]").Histo2D(ROOT.RDF.TH2DModel('L1Mu22_FirstBunchInTrain_bxmin1_etaphi'+suffix, '', 100, -5,5, 100, -3.1416, 3.1416), 'probeL1Mu22Bxmin1_Eta', 'probeL1Mu22Bxmin1_Phi')
+            histos['L1Mu22_FirstBunchInTrain_bxmin1_etaphi'+suffix] = df_mu[i].Filter("passL1_Final_bxmin1[472]").Histo2D(ROOT.RDF.TH2DModel('L1Mu22_FirstBunchInTrain_bxmin1_etaphi'+suffix, '', 100, -5,5, 100, -3.1416, 3.1416), 'probeL1Mu22Bxmin1_Eta', 'probeL1Mu22Bxmin1_Phi')
 
-            histos['L1Mu22_FirstBunchInTrain_bxmin1_eta'+suffix] = df_mu[i].Filter("_runNb>=361468").Filter("passL1_Initial_bx0[473]").Histo1D(ROOT.RDF.TH1DModel('L1Mu22_FirstBunchInTrain_bxmin1_eta'+suffix, '', 100, -5, 5), 'probeL1Mu22Bxmin1_Eta') 
+            histos['L1Mu22_FirstBunchInTrain_bxmin1_eta'+suffix] = df_mu[i].Filter("passL1_Final_bxmin1[472]").Histo1D(ROOT.RDF.TH1DModel('L1Mu22_FirstBunchInTrain_bxmin1_eta'+suffix, '', 100, -5, 5), 'probeL1Mu22Bxmin1_Eta') 
 
             ###
 
@@ -488,10 +488,14 @@ def ZMuMu_Plots(df, suffix = ''):
 
 def CleanJets(df):
     #List of cleaned jets (noise cleaning + lepton/photon overlap removal)
-    df = df.Define('isCleanJet','_puppijetPassID&&_puppijetLeptonPhotonCleaned&&_puppijetPt>30')
+    
+    #df = df.Define('isCleanJet','_puppijetPassID&&_puppijetLeptonPhotonCleaned&&_puppijetPt>30')
+    df = df.Define('isCleanJet','IsCleanJet(_puppijetPt, _puppijetEta, _puppijetPhi, _lPt, _lEta, _lPhi, _lPassVetoID,  _phPt, _phEta, _phPhi, _phPassIso)')
+    #df = df.Define('isCleanJet','_puppijetPassID&&_puppijetPt>30')
     df = df.Define('cleanJet_Pt','_puppijetPt[isCleanJet]')
     df = df.Define('cleanJet_Eta','_puppijetEta[isCleanJet]')
     df = df.Define('cleanJet_Phi','_puppijetPhi[isCleanJet]')
+
     '''
     df = df.Define('isCleanJet','_jetPassID&&_jetLeptonPhotonCleaned&&_jetPt>30&&_jet_MUEF<0.5&&_jet_CEEF<0.5')
     df = df.Define('cleanJet_Pt','_jetPt[isCleanJet]')
@@ -502,7 +506,7 @@ def CleanJets(df):
     df = df.Define('cleanJet_CHEF','_jet_CHEF[isCleanJet]')
     df = df.Define('cleanJet_CEEF','_jet_CEEF[isCleanJet]')
     df = df.Define('cleanJet_MUEF','_jet_MUEF[isCleanJet]')
-    df = df.Filter(stringToPrintJets)
+    #df = df.Filter(stringToPrintJets)
     '''
     df = df.Filter('Sum(isCleanJet)>=1','>=1 clean jet with p_{T}>30 GeV')
 
@@ -613,14 +617,21 @@ def AnalyzeCleanJets(df, JetRecoPtCut, L1JetPtCut, suffix = ''):
     #Find L1 jets matched to the offline jet
     #df = df.Define('cleanJet_idxL1jet','FindL1ObjIdx(_L1jet_eta, _L1jet_phi, cleanJet_Eta, cleanJet_Phi)')
     # only take jets in bx 0
-    df = df.Define('cleanJet_idxL1jet', 'FindL1ObjIdx_setBx(_L1jet_eta, _L1jet_phi, _L1jet_bx, cleanJet_Eta, cleanJet_Phi, 0)')
-    df = df.Define('cleanJet_L1Pt','GetVal(cleanJet_idxL1jet,_L1jet_pt)')
-    df = df.Define('cleanJet_L1Bx','GetVal(cleanJet_idxL1jet,_L1jet_bx)')
+    df = df.Define('cleanJet_idxL1jetbx0', 'FindL1ObjIdx_setBx(_L1jet_eta, _L1jet_phi, _L1jet_bx, cleanJet_Eta, cleanJet_Phi, 0)')
+    #Select L1 jets in bx+/-1
+    df = df.Define('cleanJet_idxL1jetbxmin1', 'FindL1ObjIdx_setBx(_L1jet_eta, _L1jet_phi, _L1jet_bx, cleanJet_Eta, cleanJet_Phi, -1)')
+    df = df.Define('cleanJet_idxL1jetbx1', 'FindL1ObjIdx_setBx(_L1jet_eta, _L1jet_phi, _L1jet_bx, cleanJet_Eta, cleanJet_Phi, 1)')
+    
+    
+    df = df.Define('cleanJet_L1Pt','GetVal(cleanJet_idxL1jetbx0,_L1jet_pt)')
     df = df.Define('cleanJet_L1PtoverRecoPt','cleanJet_L1Pt/cleanJet_Pt')
+
+    df = df.Define('cleanJet_L1Ptbxmin1','GetVal(cleanJet_idxL1jetbxmin1,_L1jet_pt)')
+    df = df.Define('cleanJet_L1Ptbx1','GetVal(cleanJet_idxL1jetbx1,_L1jet_pt)')
     #df = df.Filter(stringFailingJets)
     ##Now some plotting (turn ons for now)
     L1PtCuts = [30., 40., 60., 80., 100., 120., 140., 160., 170., 180., 200.]
-
+    
 
     df = makehistosforturnons_inprobeetaranges(df, histos, etavarname='cleanJet_Eta', phivarname='cleanJet_Phi', ptvarname='cleanJet_Pt', responsevarname='cleanJet_L1PtoverRecoPt', etabins=jetEtaBins, l1varname='cleanJet_L1Pt', l1thresholds=L1PtCuts, prefix="Jet_plots", binning=jetmetpt_bins, l1thresholdforeffvsrunnb = L1JetPtCut, offlinethresholdforeffvsrunnb = JetRecoPtCut, suffix = suffix) 
 
@@ -636,22 +647,117 @@ def AnalyzeCleanJets(df, JetRecoPtCut, L1JetPtCut, suffix = ''):
     histos["L1JetvsEtaPhi_Numerator"+suffix] = df.Histo2D(ROOT.RDF.TH2DModel('h_L1Jet{}vsEtaPhi_Numerator'.format(int(L1JetPtCut))+suffix, '', 100,-5,5,100,-3.1416,3.1416), 'cleanHighPtJet_Eta_PassL1Jet','cleanHighPtJet_Phi_PassL1Jet')
     histos["L1JetvsEtaPhi_EtaRestricted"+suffix] = df.Histo2D(ROOT.RDF.TH2DModel('h_L1Jet{}vsEtaPhi_EtaRestricted'.format(int(L1JetPtCut))+suffix, '', 100,-5,5,100,-3.1416,3.1416), 'cleanHighPtJet_Eta','cleanHighPtJet_Phi')
     
+    df = df.Define('probe_cleanJet_Eta','cleanJet_Eta[cleanJet_Pt>100&&cleanJet_Pt<16000]')
+    df = df.Define('probe_cleanJet_Phi','cleanJet_Phi[cleanJet_Pt>100&&cleanJet_Pt<16000]')
+    df = df.Define('probe_cleanJet_Pt','cleanJet_Pt[cleanJet_Pt>100&&cleanJet_Pt<16000]')
+
+    L1Ptjetrange = ['50', '150']
+    L1Ptcut = '&&cleanJet_L1Ptbxmin1>'+L1Ptjetrange[0]+'&&cleanJet_L1Ptbxmin1<='+L1Ptjetrange[1]
+    df = df.Define('probeL1Jet'+L1Ptjetrange[0]+'to'+L1Ptjetrange[1]+'Bxmin1_Eta','cleanJet_Eta[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
+    df = df.Define('probeL1Jet'+L1Ptjetrange[0]+'to'+L1Ptjetrange[1]+'Bxmin1_Phi','cleanJet_Phi[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
+    df = df.Define('probeL1Jet'+L1Ptjetrange[0]+'to'+L1Ptjetrange[1]+'Bxmin1_Pt','cleanJet_Pt[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
+
+    L1Ptcut = '&&cleanJet_L1Pt>'+L1Ptjetrange[0]+'&&cleanJet_L1Pt<='+L1Ptjetrange[1]
+    df = df.Define('probeL1Jet'+L1Ptjetrange[0]+'to'+L1Ptjetrange[1]+'Bx0_Eta','cleanJet_Eta[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
+    df = df.Define('probeL1Jet'+L1Ptjetrange[0]+'to'+L1Ptjetrange[1]+'Bx0_Phi','cleanJet_Phi[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
+    df = df.Define('probeL1Jet'+L1Ptjetrange[0]+'to'+L1Ptjetrange[1]+'Bx0_Pt','cleanJet_Pt[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
+    
+    L1Ptcut = '&&cleanJet_L1Ptbx1>'+L1Ptjetrange[0]+'&&cleanJet_L1Ptbx1<='+L1Ptjetrange[1]
+    df = df.Define('probeL1Jet'+L1Ptjetrange[0]+'to'+L1Ptjetrange[1]+'Bxplus1_Eta','cleanJet_Eta[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
+    df = df.Define('probeL1Jet'+L1Ptjetrange[0]+'to'+L1Ptjetrange[1]+'Bxplus1_Phi','cleanJet_Phi[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
+    df = df.Define('probeL1Jet'+L1Ptjetrange[0]+'to'+L1Ptjetrange[1]+'Bxplus1_Pt','cleanJet_Pt[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')    
 
 
-    df = df.Define('probeL1Jet100to150Bxmin1_Eta','cleanJet_Eta[cleanJet_Pt>90&&cleanJet_Pt<160&&cleanJet_L1Pt>100&&cleanJet_L1Pt<=150&&cleanJet_L1Bx==-1]')
-    df = df.Define('probeL1Jet100to150Bxmin1_Phi','cleanJet_Phi[cleanJet_Pt>90&&cleanJet_Pt<160&&cleanJet_L1Pt>100&&cleanJet_L1Pt<=150&&cleanJet_L1Bx==-1]')
-    df = df.Define('probeL1Jet100to150Bx0_Eta','cleanJet_Eta[cleanJet_Pt>90&&cleanJet_Pt<160&&cleanJet_L1Pt>100&&cleanJet_L1Pt<=150&&cleanJet_L1Bx==0]')
-    df = df.Define('probeL1Jet100to150Bx0_Phi','cleanJet_Phi[cleanJet_Pt>90&&cleanJet_Pt<160&&cleanJet_L1Pt>100&&cleanJet_L1Pt<=150&&cleanJet_L1Bx==0]')
-    df = df.Define('probeL1Jet100to150Bxplus1_Eta','cleanJet_Eta[cleanJet_Pt>90&&cleanJet_Pt<160&&cleanJet_L1Pt>100&&cleanJet_L1Pt<=150&&cleanJet_L1Bx==1]')
-    df = df.Define('probeL1Jet100to150Bxplus1_Phi','cleanJet_Phi[cleanJet_Pt>90&&cleanJet_Pt<160&&cleanJet_L1Pt>100&&cleanJet_L1Pt<=150&&cleanJet_L1Bx==1]')
+    L1Ptcut = '&&cleanJet_L1Ptbxmin1>180'
+    df = df.Define('probeL1Jet180Bxmin1_Eta','cleanJet_Eta[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
+    df = df.Define('probeL1Jet180Bxmin1_Phi','cleanJet_Phi[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
+    df = df.Define('probeL1Jet180Bxmin1_Pt','cleanJet_Pt[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
 
-    histos['L1Jet100to150_bxmin1_etaphi'+suffix] = df.Histo2D(ROOT.RDF.TH2DModel('L1Jet100to150_bxmin1_etaphi'+suffix, '', 100, -5,5, 100, -3.1416, 3.1416), 'probeL1Jet100to150Bxmin1_Eta', 'probeL1Jet100to150Bxmin1_Phi')
-    histos['L1Jet100to150_bx0_etaphi'+suffix] = df.Histo2D(ROOT.RDF.TH2DModel('L1Jet100to150_bx0_etaphi'+suffix, '', 100, -5,5, 100, -3.1416, 3.1416), 'probeL1Jet100to150Bx0_Eta', 'probeL1Jet100to150Bx0_Phi')
-    histos['L1Jet100to150_bxplus1_etaphi'+suffix] = df.Histo2D(ROOT.RDF.TH2DModel('L1Jet100to150_bxplus1_etaphi'+suffix, '', 100, -5,5, 100, -3.1416, 3.1416), 'probeL1Jet100to150Bxplus1_Eta', 'probeL1Jet100to150Bxplus1_Phi')
+    L1Ptcut = '&&cleanJet_L1Pt>'+L1Ptjetrange[0]+'&&cleanJet_L1Pt<='+L1Ptjetrange[1]
+    df = df.Define('probeL1Jet180Bx0_Eta','cleanJet_Eta[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
+    df = df.Define('probeL1Jet180Bx0_Phi','cleanJet_Phi[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
+    df = df.Define('probeL1Jet180Bx0_Pt','cleanJet_Pt[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
 
-    histos['L1Jet100to150_bxmin1_eta'+suffix] = df.Histo1D(ROOT.RDF.TH1DModel('L1Jet100to150_bxmin1_eta'+suffix, '', 100, -5, 5), 'probeL1Jet100to150Bxmin1_Eta')
-    histos['L1Jet100to150_bx0_eta'+suffix] = df.Histo1D(ROOT.RDF.TH1DModel('L1Jet100to150_bx0_eta'+suffix, '', 100, -5, 5), 'probeL1Jet100to150Bx0_Eta')
-    histos['L1Jet100to150_bxplus1_eta'+suffix] = df.Histo1D(ROOT.RDF.TH1DModel('L1Jet100to150_bxplus1_eta'+suffix, '', 100, -5, 5), 'probeL1Jet100to150Bxplus1_Eta')
+    L1Ptcut = '&&cleanJet_L1Ptbx1>'+L1Ptjetrange[0]+'&&cleanJet_L1Ptbx1<='+L1Ptjetrange[1]
+    df = df.Define('probeL1Jet180Bxplus1_Eta','cleanJet_Eta[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
+    df = df.Define('probeL1Jet180Bxplus1_Phi','cleanJet_Phi[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
+    df = df.Define('probeL1Jet180Bxplus1_Pt','cleanJet_Pt[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
+
+    '''
+    df = df.Define('probeL1Jet180Bxmin1_Eta','cleanJet_Eta[cleanJet_Pt>100&&cleanJet_Pt<160'+'&&'+L1Ptcut+'&&cleanJet_L1Bx==-1]')
+    df = df.Define('probeL1Jet180Bxmin1_Phi','cleanJet_Phi[cleanJet_Pt>100&&cleanJet_Pt<160'+'&&'+L1Ptcut+'&&cleanJet_L1Bx==-1]')
+    df = df.Define('probeL1Jet180Bx0_Eta','cleanJet_Eta[cleanJet_Pt>100&&cleanJet_Pt<160'+'&&'+L1Ptcut+'&&cleanJet_L1Bx==0]')
+    df = df.Define('probeL1Jet180Bx0_Phi','cleanJet_Phi[cleanJet_Pt>100&&cleanJet_Pt<160'+'&&'+L1Ptcut+'&&cleanJet_L1Bx==0]')
+    df = df.Define('probeL1Jet180Bxplus1_Eta','cleanJet_Eta[cleanJet_Pt>100&&cleanJet_Pt<160'+'&&'+L1Ptcut+'&&cleanJet_L1Bx==1]')
+    df = df.Define('probeL1Jet180Bxplus1_Phi','cleanJet_Phi[cleanJet_Pt>100&&cleanJet_Pt<160'+'&&'+L1Ptcut+'&&cleanJet_L1Bx==1]')
+    '''
+
+    #For study of SingleJet100-150, we can use all events
+    theprefix = 'L1Jet'+L1Ptjetrange[0]+'to'+L1Ptjetrange[1]
+    probejetprefix = 'probeL1Jet'+L1Ptjetrange[0]+'to'+L1Ptjetrange[1]
+    histos['AllEvts_probe_cleanJet_etaphi'+suffix] = df.Histo2D(ROOT.RDF.TH2DModel('AllEvts_probe_cleanJet_etaphi'+suffix, '', 100, -5,5, 100, -3.1416, 3.1416), 'probe_cleanJet_Eta', 'probe_cleanJet_Phi')
+    histos[theprefix+'_bxmin1_etaphi'+suffix] = df.Histo2D(ROOT.RDF.TH2DModel(theprefix+'_bxmin1_etaphi'+suffix, '', 100, -5,5, 100, -3.1416, 3.1416), probejetprefix+'Bxmin1_Eta', probejetprefix+'Bxmin1_Phi')
+    histos[theprefix+'_bx0_etaphi'+suffix] = df.Histo2D(ROOT.RDF.TH2DModel(theprefix+'_bx0_etaphi'+suffix, '', 100, -5,5, 100, -3.1416, 3.1416), probejetprefix+'Bx0_Eta', probejetprefix+'Bx0_Phi')
+    histos[theprefix+'_bxplus1_etaphi'+suffix] = df.Histo2D(ROOT.RDF.TH2DModel(theprefix+'_bxplus1_etaphi'+suffix, '', 100, -5,5, 100, -3.1416, 3.1416), probejetprefix+'Bxplus1_Eta', probejetprefix+'Bxplus1_Phi')
+
+    histos['AllEvts_probe_cleanJet_eta'+suffix] = df.Histo1D(ROOT.RDF.TH1DModel('AllEvts_probe_cleanJet_eta'+suffix, '', 100, -5, 5), 'probe_cleanJet_Eta')
+    histos[theprefix+'_bxmin1_eta'+suffix] = df.Histo1D(ROOT.RDF.TH1DModel(theprefix+'_bxmin1_eta'+suffix, '', 100, -5, 5), probejetprefix+'Bxmin1_Eta')
+    histos[theprefix+'_bx0_eta'+suffix] = df.Histo1D(ROOT.RDF.TH1DModel(theprefix+'_bx0_eta'+suffix, '', 100, -5, 5), probejetprefix+'Bx0_Eta')
+    histos[theprefix+'_bxplus1_eta'+suffix] = df.Histo1D(ROOT.RDF.TH1DModel(theprefix+'_bxplus1_eta'+suffix, '', 100, -5, 5), probejetprefix+'Bxplus1_Eta')
+    
+    histos['AllEvts_probe_cleanJet_etapt'+suffix] = df.Histo2D(ROOT.RDF.TH2DModel('AllEvts_probe_cleanJet_etapt'+suffix, '', 100, -5,5, len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'probe_cleanJet_Eta', 'probe_cleanJet_Pt')
+    histos[theprefix+'_bxmin1_etapt'+suffix] = df.Histo2D(ROOT.RDF.TH2DModel(theprefix+'_bxmin1_etapt'+suffix, '', 100, -5,5, len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), probejetprefix+'Bxmin1_Eta', probejetprefix+'Bxmin1_Pt')
+    histos[theprefix+'_bx0_etapt'+suffix] = df.Histo2D(ROOT.RDF.TH2DModel(theprefix+'_bx0_etapt'+suffix, '', 100, -5,5, len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), probejetprefix+'Bx0_Eta', probejetprefix+'Bx0_Pt')
+    histos[theprefix+'_bxplus1_etapt'+suffix] = df.Histo2D(ROOT.RDF.TH2DModel(theprefix+'_bxplus1_etapt'+suffix, '', 100, -5,5, len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), probejetprefix+'Bxplus1_Eta', probejetprefix+'Bxplus1_Pt')
+
+
+
+    #For study of SingleJet180, we need unprefirable events only 
+    filterunprefevents = 'passL1_Final_bxmin1[472]||Flag_IsUnprefirable'
+    df_unpref = df.Filter(filterunprefevents)
+    #Add a global denominator (no matching condition to a L1 jet)
+    histos['Unpref_probe_cleanJet_etaphi'+suffix] = df_unpref.Histo2D(ROOT.RDF.TH2DModel('Unpref_probe_cleanJet_etaphi'+suffix, '', 100, -5,5, 100, -3.1416, 3.1416), 'probe_cleanJet_Eta', 'probe_cleanJet_Phi')
+    histos['L1Jet180_bxmin1_etaphi'+suffix] = df_unpref.Histo2D(ROOT.RDF.TH2DModel('L1Jet180_bxmin1_etaphi'+suffix, '', 100, -5,5, 100, -3.1416, 3.1416), 'probeL1Jet180Bxmin1_Eta', 'probeL1Jet180Bxmin1_Phi')
+    histos['L1Jet180_bx0_etaphi'+suffix] = df_unpref.Histo2D(ROOT.RDF.TH2DModel('L1Jet180_bx0_etaphi'+suffix, '', 100, -5,5, 100, -3.1416, 3.1416), 'probeL1Jet180Bx0_Eta', 'probeL1Jet180Bx0_Phi')
+    histos['L1Jet180_bxplus1_etaphi'+suffix] = df_unpref.Histo2D(ROOT.RDF.TH2DModel('L1Jet180_bxplus1_etaphi'+suffix, '', 100, -5,5, 100, -3.1416, 3.1416), 'probeL1Jet180Bxplus1_Eta', 'probeL1Jet180Bxplus1_Phi')
+
+    histos['Unpref_probe_cleanJet_eta'+suffix] = df_unpref.Histo1D(ROOT.RDF.TH1DModel('Unpref_probe_cleanJet_eta'+suffix, '', 100, -5, 5), 'probe_cleanJet_Eta')
+    histos['L1Jet180_bxmin1_eta'+suffix] = df_unpref.Histo1D(ROOT.RDF.TH1DModel('L1Jet180_bxmin1_eta'+suffix, '', 100, -5, 5), 'probeL1Jet180Bxmin1_Eta')
+    histos['L1Jet180_bx0_eta'+suffix] = df_unpref.Histo1D(ROOT.RDF.TH1DModel('L1Jet180_bx0_eta'+suffix, '', 100, -5, 5), 'probeL1Jet180Bx0_Eta')
+    histos['L1Jet180_bxplus1_eta'+suffix] = df_unpref.Histo1D(ROOT.RDF.TH1DModel('L1Jet180_bxplus1_eta'+suffix, '', 100, -5, 5), 'probeL1Jet180Bxplus1_Eta')
+
+    histos['Unpref_probe_cleanJet_etapt'+suffix] = df_unpref.Histo2D(ROOT.RDF.TH2DModel('Unpref_probe_cleanJet_etapt'+suffix, '', 100, -5,5, len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'probe_cleanJet_Eta', 'probe_cleanJet_Pt')
+    histos['L1Jet180_bxmin1_etapt'+suffix] = df_unpref.Histo2D(ROOT.RDF.TH2DModel('L1Jet180_bxmin1_etapt'+suffix, '', 100, -5,5, len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'probeL1Jet180Bxmin1_Eta', 'probeL1Jet180Bxmin1_Pt')
+    histos['L1Jet180_bx0_etapt'+suffix] = df_unpref.Histo2D(ROOT.RDF.TH2DModel('L1Jet180_bx0_etapt'+suffix, '', 100, -5,5, len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'probeL1Jet180Bx0_Eta', 'probeL1Jet180Bx0_Pt')
+    histos['L1Jet180_bxplus1_etapt'+suffix] = df_unpref.Histo2D(ROOT.RDF.TH2DModel('L1Jet180_bxplus1_etapt'+suffix, '', 100, -5,5, len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'probeL1Jet180Bxplus1_Eta', 'probeL1Jet180Bxplus1_Pt')
+
+
+
+    #Now taus 
+
+    df = df.Define('_L1isotauer2p1_eta','_L1tau_eta[abs(_L1tau_eta)<2.1&&_L1tau_iso]')
+    df = df.Define('_L1isotauer2p1_pt','_L1tau_pt[abs(_L1tau_eta)<2.1&&_L1tau_iso]')
+    df = df.Define('_L1isotauer2p1_phi','_L1tau_phi[abs(_L1tau_eta)<2.1&&_L1tau_iso]')
+    df = df.Define('_L1isotauer2p1_bx','_L1tau_bx[abs(_L1tau_eta)<2.1&&_L1tau_iso]')
+
+    df = df.Define('cleanJet_idxL1taubx0', 'FindL1ObjIdx_setBx(_L1isotauer2p1_eta, _L1isotauer2p1_phi, _L1isotauer2p1_bx, cleanJet_Eta, cleanJet_Phi, 0)')
+    df = df.Define('cleanJet_idxL1taubxmin1', 'FindL1ObjIdx_setBx(_L1isotauer2p1_eta, _L1isotauer2p1_phi, _L1isotauer2p1_bx, cleanJet_Eta, cleanJet_Phi, -1)')
+    df = df.Define('cleanJet_idxL1taubx1', 'FindL1ObjIdx_setBx(_L1isotauer2p1_eta, _L1isotauer2p1_phi, _L1isotauer2p1_bx, cleanJet_Eta, cleanJet_Phi, 1)')
+    
+    df = df.Define('cleanJet_L1tauPt','GetVal(cleanJet_idxL1taubx0,_L1tau_pt)')
+    df = df.Define('cleanJet_L1tauPtbxmin1','GetVal(cleanJet_idxL1taubxmin1,_L1tau_pt)')
+    df = df.Define('cleanJet_L1tauPtbx1','GetVal(cleanJet_idxL1taubx1,_L1tau_pt)')
+    
+    L1Ptcut = '&&cleanJet_L1tauPtbxmin1>34'
+    df = df.Define('probeL1isotau34er2p1Bxmin1_Eta','cleanJet_Eta[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
+    df = df.Define('probeL1isotau34er2p1Bxmin1_Phi','cleanJet_Phi[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
+    df = df.Define('probeL1isotau34er2p1Bxmin1_Pt','cleanJet_Pt[cleanJet_Pt>100&&cleanJet_Pt<16000'+L1Ptcut+']')
+    
+    histos['L1IsoTau34Er2p1_bxmin1_etapt'+suffix] = df.Histo2D(ROOT.RDF.TH2DModel('L1IsoTau34Er2p1_bxmin1_etapt'+suffix, '', 100, -5,5, len(jetmetpt_bins)-1, array('d',jetmetpt_bins)), 'probeL1isotau34er2p1Bxmin1_Eta', 'probeL1isotau34er2p1Bxmin1_Pt')
+    
+
+
+
 
     return df, histos
 
@@ -717,7 +823,7 @@ def PtBalanceSelection(df):
     #Compute Pt balance = pt(jet)/pt(ref) => here ref is a photon
     #Reco first
     df = df.Define('ptbalance','cleanJet_Pt[0]/ref_Pt')
-    df = df.Define('ptbalanceL1','_L1jet_pt[cleanJet_idxL1jet[0]]/ref_Pt')
+    df = df.Define('ptbalanceL1','_L1jet_pt[cleanJet_idxL1jetbx0[0]]/ref_Pt')
     df = df.Define('probe_Eta','cleanJet_Eta[0]') 
     df = df.Define('probe_Phi','cleanJet_Phi[0]')
     return df

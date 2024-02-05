@@ -71,6 +71,7 @@ bool PassDiJet140_70_Mjj900(ROOT::VecOps::RVec<float>pt, ROOT::VecOps::RVec<floa
     if(pt[i]<140)continue;
     for(unsigned int j = 0; j<pt.size(); j++){
       if(eta[i]*eta[j]>0) continue;
+      if(abs(eta[i]-eta[j])<2.7) continue;
       if(pt[j]<70)continue;
       TLorentzVector jet1, jet2;
       jet1.SetPtEtaPhiM(pt[i], eta[i], phi[i], 0.);

@@ -1,0 +1,5 @@
+/pnfs/iihe/cms/ph/sc4/store/data/Run2022C/Muon/NANOAOD/JMENano12p5-v1
+/pnfs/iihe/cms/ph/sc4/store/data/Run2022C/Muon/NANOAOD/JMENano12p5-v2
+/pnfs/iihe/cms/ph/sc4/store/data/Run2022D/Muon/NANOAOD/JMENano12p5-v1
+/pnfs/iihe/cms/ph/sc4/store/data/Run2022E/Muon/NANOAOD/JMENano12p5-v1
+/pnfs/iihe/cms/ph/sc4/store/data/Run2022G/Muon/NANOAOD/JMENano12p5-v1
