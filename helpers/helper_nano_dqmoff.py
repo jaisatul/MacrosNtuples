@@ -217,7 +217,11 @@ def DQMOff_EtSumSelection(df):
 
     df = df.Define('recoMET', 'CaloMET_pt')
     df = df.Define('recoMETPhi','CaloMET_phi')
-    df = df.Define('recoMETSumEt', 'CaloMET_sumEt')
+    df = df.Define('recoETT', 'CaloMET_sumEt')
+    df = df.Define('recoHTTandMHT', 'RecoHTTandMHT(Jet_pt, Jet_eta, Jet_phi,  2.5, 2.5)')
+    df = df.Define('recoHTT', 'recoHTTandMHT[0]')
+    df = df.Define('recoMHT', 'recoHTTandMHT[1]')
+    df = df.Define('recoMHTPhi', 'recoHTTandMHT[2]')
 
     return df
 
@@ -237,7 +241,7 @@ def ZEE_DQMOff_Plots(df, suffix = ''):
         prefix = iso
 
         # Get Ids for L1 Electrons which match with probe
-        df_eg[i] = df.Define('probe_idxL1EG','FindL1EGIdx_setBx(L1EG_eta, L1EG_phi, L1EG_bx, probe_Eta, probe_Phi, probe_Pt, 0, L1EG_hwIso, {})'.format(config['Isos'][iso]))
+        df_eg[i] = df.Define('probe_idxL1EG','FindL1ObjIdx_setBx(L1EG_eta, L1EG_phi, L1EG_bx, probe_Eta, probe_Phi, 0, L1EG_hwIso, {}, 0.3)'.format(config['Isos'][iso]))
 
         df_eg[i] = df_eg[i].Define('probe_L1Pt','GetVal(probe_idxL1EG, L1EG_pt)')
         df_eg[i] = df_eg[i].Define('probe_L1Eta','GetVal(probe_idxL1EG, L1EG_eta)')
@@ -374,6 +378,9 @@ def ZMuMu_DQMOff_Plots(df, suffix = ''):
     # L1Mu_hwCharge = 1 corresponds to Muon_charge = -1
     df = df.Define('L1Mu_charge', 'charge_conversion(L1Mu_hwCharge)')
 
+    # # Prefiring histos
+    # df = df.Define('L1Mu_pt10_qual12_bxmin1', GetL1Mu_setBx())
+
     histos = {}
     df_mu = [None] * len(config['Qualities'])
 
@@ -394,6 +401,7 @@ def ZMuMu_DQMOff_Plots(df, suffix = ''):
         df_mu[i] = df_mu[i].Define('probe_L1PtReso','((probe_L1Charge*probe_Charge*probe_Pt)-probe_L1Pt)/probe_L1Pt')
         df_mu[i] = df_mu[i].Define('probe_L1EtaReso','(probe_L1Eta-probe_Eta)')
         df_mu[i] = df_mu[i].Define('probe_L1PhiReso','CorrectedDeltaPhi_OfflineMuStation_L1Mu(probe_Charge, probe_Pt, probe_Eta, probe_Phi, probe_L1Phi)')
+
 
         pt_binning = dqmoff_muonpt_bins
         eta_binning = dqmoff_muoneta_bins
@@ -638,7 +646,7 @@ def Jet_DQMOff_Plots(df, suffix = ''):
     histos = {}
     prefix = ''
 
-    df_jet = df.Define('lead_idxL1Jet', 'FindL1JetIdx_setBx(L1Jet_eta, L1Jet_phi, L1Jet_bx, leadJetEta, leadJetPhi, 0, {}, -1, 0.3)')
+    df_jet = df.Define('lead_idxL1Jet', 'FindL1ObjIdx_setBx(L1Jet_eta, L1Jet_phi, L1Jet_bx, leadJetEta, leadJetPhi, 0, {}, -1, 0.3)')
     df_jet = df_jet.Define('lead_L1JetPt', 'GetVal(lead_idxL1Jet, L1Jet_pt)')
     df_jet = df_jet.Define('lead_L1JetEta', 'GetVal(lead_idxL1Jet, L1Jet_eta)')
     df_jet = df_jet.Define('lead_L1JetPhi', 'GetVal(lead_idxL1Jet, L1Jet_phi)')
@@ -722,28 +730,59 @@ def EtSum_DQMOff_Plots(df, suffix = ''):
     df_met = df.Define('idxL1MET', 'FindL1EtSumIdx_setBx(L1EtSum_etSumType, L1EtSum_bx, 2, 0)')
     df_met = df_met.Define('L1MET', 'L1EtSum_pt[idxL1MET]')
     df_met = df_met.Define('L1METPhi', 'L1EtSum_phi[idxL1MET]')
-
     df_met = df_met.Define('reso_met', '(L1MET - recoMET)/recoMET')
-    df_met = df_met.Define('reso_phi', 'L1METPhi - recoMETPhi')
+    df_met = df_met.Define('reso_metphi', 'L1METPhi - recoMETPhi')
+
+    df_met = df_met.Define('idxL1MHT', 'FindL1EtSumIdx_setBx(L1EtSum_etSumType, L1EtSum_bx, 3, 0)')
+    df_met = df_met.Define('L1MHT', 'L1EtSum_pt[idxL1MHT]')
+    df_met = df_met.Define('L1MHTPhi', 'L1EtSum_phi[idxL1MHT]')
+    df_met = df_met.Define('reso_mht', '(L1MHT - recoMHT)/recoMHT')
+    df_met = df_met.Define('reso_mhtphi', 'L1MHTPhi - recoMHTPhi')
+
+
+    df_met = df_met.Define('idxL1HTT', 'FindL1EtSumIdx_setBx(L1EtSum_etSumType, L1EtSum_bx, 8, 0)')
+    df_met = df_met.Define('L1HTT', 'L1EtSum_pt[idxL1HTT]')
+    df_met = df_met.Define('reso_htt', '(L1HTT - recoHTT)/recoHTT')
+    
+    df_met = df_met.Define('idxL1ETT', 'FindL1EtSumIdx_setBx(L1EtSum_etSumType, L1EtSum_bx, 1, 0)')
+    df_met = df_met.Define('L1ETT', 'L1EtSum_pt[idxL1ETT]')
+    df_met = df_met.Define('reso_ett', '(L1ETT - recoETT)/recoETT')
+    
 
     met_binning = dqmoff_etsum_bins
     n_metbins = len(met_binning) - 1
 
-    reso_pt_binning = dqmoff_etsumresolution_pt_bins
-    reso_phi_binning = dqmoff_etsumresolution_phi_bins
+    reso_pt_binning = dqmoff_etsumresolution_met_bins
+    reso_phi_binning = dqmoff_etsumresolution_metphi_bins
 
     n_resoptbins = len(reso_pt_binning) - 1
     n_resophibins = len(reso_phi_binning) - 1
 
     if config['L1TResolution']:
 
-        histos['reso_pt_'+prefix+'_'+suffix] = df_met.Histo1D (
+        histos['reso_met_'+prefix+'_'+suffix] = df_met.Histo1D (
             ROOT.RDF.TH1DModel('h_EtSum_reso_met_{}'.format(prefix)+suffix, '', n_resoptbins, reso_pt_binning), 
             'reso_met'
         )
-        histos['reso_phi_'+prefix+'_'+suffix] = df_met.Histo1D (
-            ROOT.RDF.TH1DModel('h_EtSum_reso_phi_{}'.format(prefix)+suffix, '', n_resophibins, reso_phi_binning), 
-            'reso_phi'
+        histos['reso_metphi_'+prefix+'_'+suffix] = df_met.Histo1D (
+            ROOT.RDF.TH1DModel('h_EtSum_reso_metphi_{}'.format(prefix)+suffix, '', n_resophibins, reso_phi_binning), 
+            'reso_metphi'
+        )
+        histos['reso_mht_'+prefix+'_'+suffix] = df_met.Histo1D (
+            ROOT.RDF.TH1DModel('h_EtSum_reso_mht_{}'.format(prefix)+suffix, '', n_resoptbins, reso_pt_binning), 
+            'reso_mht'
+        )
+        histos['reso_mhtphi_'+prefix+'_'+suffix] = df_met.Histo1D (
+            ROOT.RDF.TH1DModel('h_EtSum_reso_mhtphi_{}'.format(prefix)+suffix, '', n_resophibins, reso_phi_binning), 
+            'reso_mhtphi'
+        )
+        histos['reso_htt_'+prefix+'_'+suffix] = df_met.Histo1D (
+            ROOT.RDF.TH1DModel('h_EtSum_reso_htt_{}'.format(prefix)+suffix, '', n_resoptbins, reso_pt_binning), 
+            'reso_htt'
+        )
+        histos['reso_ett_'+prefix+'_'+suffix] = df_met.Histo1D (
+            ROOT.RDF.TH1DModel('h_EtSum_reso_ett_{}'.format(prefix)+suffix, '', n_resoptbins, reso_pt_binning), 
+            'reso_ett'
         )
 
     if config['L1TEfficiency']:

@@ -91,5 +91,5 @@ dqmoff_etsum_bins = list(
 )
 dqmoff_etsum_bins = array('f', dqmoff_etsum_bins)
 
-dqmoff_etsumresolution_pt_bins = array('f', [-1.0 + i * 0.05 for i in range(71)])
-dqmoff_etsumresolution_phi_bins = array('f', [-1.0 + i * 0.01 for i in range(201)])
+dqmoff_etsumresolution_met_bins = array('f', [-1.0 + i * 0.05 for i in range(71)])
+dqmoff_etsumresolution_metphi_bins = array('f', [-1.0 + i * 0.01 for i in range(201)])
