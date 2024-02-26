@@ -117,7 +117,9 @@ def main():
 
     # binning for run number
     h.set_runnb_bins(df)
-    
+
+    #Define ETMHF
+    df = h.L1ETMHF(df)
     if args.outputFile == '':
         args.outputFile = 'output_'+args.channel+'.root'
     out = ROOT.TFile(args.outputFile, "recreate")
@@ -266,7 +268,9 @@ def main():
 
     if args.channel == 'ZToEE':
         df = h.lepton_iselectron(df)
-        df = h.ZEE_EleSelection(df)
+        df_fwd = h.ZEE_Forward_EleSelection(df, 70, 120)
+        df_prefvsmll = h.ZEE_EleSelection(df, 70, 10000)
+        df = h.ZEE_EleSelection(df, 80, 100)
 
         # make copies of df for each bin of nvtx (+1 copy of the original)
         df_list = [df.Filter(nvtx_cut) for nvtx_cut in filter_list]
@@ -274,15 +278,24 @@ def main():
 
         for i, df_element in enumerate(df_list):
             df_element, histos = h.ZEE_Plots(df_element, suffix = suffix_list[i])
-
+            
             for key, val in histos.items():
                 all_histos[key] = val
+
+        df_fwd, fwd_histos = h.ZEE_Forward_Plots(df_fwd)
         
+        
+        df_prefvsmll, histos_pref = h.PrefiringVsMll(df_prefvsmll)
         for i in all_histos:
             all_histos[i].GetValue().Write()
+        for i in fwd_histos:
+            fwd_histos[i].GetValue().Write()
+        for i in histos_pref:
+            histos_pref[i].GetValue().Write()
 
     if args.channel == 'ZToMuMu':
-        df = h.ZMuMu_MuSelection(df)
+        df_prefvsmll = h.ZMuMu_MuSelection(df, 70, 10000)
+        df = h.ZMuMu_MuSelection(df, 80, 100)
 
         # make copies of df for each bin of nvtx (+1 copy of the original)
         df_list = [df.Filter(nvtx_cut) for nvtx_cut in filter_list]
@@ -293,9 +306,13 @@ def main():
 
             for key, val in histos.items():
                 all_histos[key] = val
+           
 
+        df_prefvsmll, histos_pref = h.PrefiringVsMll(df_prefvsmll)
         for i in all_histos:
             all_histos[i].GetValue().Write()
+        for i in histos_pref:
+            histos_pref[i].GetValue().Write()
 
     if args.channel == 'DiJet':
         df = h.DiJetSelection(df) 

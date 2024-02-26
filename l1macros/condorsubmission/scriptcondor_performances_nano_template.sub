@@ -1,11 +1,11 @@
 # Files
 executable = scriptcondor_performances_nano.sh
-output = /user/hevard/CMSSW_12_4_8/src/MacrosNtuples/l1macros/condorsubmission/OUTPUTDIR/log/scriptcondor_$(Process).out
-error = /user/hevard/CMSSW_12_4_8/src/MacrosNtuples/l1macros/condorsubmission/OUTPUTDIR/log/scriptcondor_$(Process).err
-log = /user/hevard/CMSSW_12_4_8/src/MacrosNtuples/l1macros/condorsubmission/OUTPUTDIR/log/scriptcondor_$(Process).log
+output = /user/lathomas/GITStuff/MacrosNtuples/l1macros/condorsubmission/OUTPUTDIR/log/scriptcondor_$(Process).out
+error = /user/lathomas/GITStuff/MacrosNtuples/l1macros/condorsubmission/OUTPUTDIR/log/scriptcondor_$(Process).err
+log = /user/lathomas/GITStuff/MacrosNtuples/l1macros/condorsubmission/OUTPUTDIR/log/scriptcondor_$(Process).log
 
 transfer_input_files = $(filename)
-arguments            = $(filename)  /user/hevard/CMSSW_12_4_8/src/MacrosNtuples/l1macros/condorsubmission/OUTPUTDIR/output_$(Process).root CHANNEL GOLDENJSON
+arguments            = $(filename)  /user/lathomas/GITStuff/MacrosNtuples/l1macros/condorsubmission/OUTPUTDIR/output_$(Process).root CHANNEL GOLDENJSON
 
 # File transfer behavior
 #should_transfer_files = no

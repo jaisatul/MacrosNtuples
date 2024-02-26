@@ -34,7 +34,7 @@ HF_noise: true
 PU_plots:
     # Whether or not to compute the histograms for each bin of nvtx.
     # this field needs to exist, and must be set to either true or false.
-    make_histos: true
+    make_histos: false
     # The bins of nvtx to use
     # nvtx_bins: [<bin 1>, <bin 2>, ...]
     # using this will make copies of each histogram for each bin
