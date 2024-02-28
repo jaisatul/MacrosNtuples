@@ -150,7 +150,7 @@ vector<int> FindL1MuIdx(ROOT::VecOps::RVec<float>L1Obj_eta, ROOT::VecOps::RVec<f
         if(L1Obj_CutVar[j]<CutVar) continue;
       }
       double deta = abs(recoObj_Eta[i]-L1Obj_eta[j]);
-      double dphi = deltaphi_offlinemustation2_l1mu(charge[j], recoObj_Pt[i], recoObj_Eta[i], recoObj_Phi[i], L1Obj_phi[j]);
+      double dphi = deltaphi_offlinemustation2_l1mu(charge[i], recoObj_Pt[i], recoObj_Eta[i], recoObj_Phi[i], L1Obj_phi[j]);
       double dr = sqrt(deta*deta+dphi*dphi);
       
       if(dr<=drmin){ 
@@ -180,7 +180,7 @@ vector<int> FindL1MuIdx_setBx(ROOT::VecOps::RVec<float>L1Obj_eta, ROOT::VecOps::
       }
       double deta = abs(recoObj_Eta[i]-L1Obj_eta[j]);
       // Delta Phi correction at station 2
-      double dphi = deltaphi_offlinemustation2_l1mu(charge[j], recoObj_Pt[i], recoObj_Eta[i], recoObj_Phi[i], L1Obj_phi[j]);
+      double dphi = deltaphi_offlinemustation2_l1mu(charge[i], recoObj_Pt[i], recoObj_Eta[i], recoObj_Phi[i], L1Obj_phi[j]);
       double dr = sqrt(deta*deta+dphi*dphi);
       if(dr<=drmin){ 
         drmin = dr; 
