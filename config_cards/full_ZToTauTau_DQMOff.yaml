@@ -26,6 +26,7 @@ Thresholds: [28, 30, 32, 128, 176]
 #   these fields need to exist, and must be set to either true or false.
 L1TEfficiency: true
 L1TResolution: true
+Prefiring: true
 
 PU_plots:
     # Whether or not to compute the histograms for each bin of nvtx.

@@ -90,6 +90,8 @@ dqmoff_etsum_bins = list(
 	)
 )
 dqmoff_etsum_bins = array('f', dqmoff_etsum_bins)
-
 dqmoff_etsumresolution_met_bins = array('f', [-1.0 + i * 0.05 for i in range(71)])
 dqmoff_etsumresolution_metphi_bins = array('f', [-1.0 + i * 0.01 for i in range(201)])
+
+dqmoff_prefire_ptbins = coarse_leptonpt_bins
+dqmoff_prefire_etabins = array('f', [-2.5, -1.479, 0., 1.479, 2.5])

@@ -53,10 +53,11 @@ double deltaphi_offlinemustation2_l1mu(int charge, double mupt, double mueta, do
     return dphi;
 }  
 
-vector<int> FindL1ObjIdx(ROOT::VecOps::RVec<float>L1Obj_eta, ROOT::VecOps::RVec<float>L1Obj_phi, ROOT::VecOps::RVec<float>recoObj_Eta, ROOT::VecOps::RVec<float>recoObj_Phi, ROOT::VecOps::RVec<int>L1Obj_CutVar={}, int CutVar=-1){
+vector<int> FindL1ObjIdx(ROOT::VecOps::RVec<float>L1Obj_eta, ROOT::VecOps::RVec<float>L1Obj_phi, ROOT::VecOps::RVec<float>recoObj_Eta, ROOT::VecOps::RVec<float>recoObj_Phi, ROOT::VecOps::RVec<int>L1Obj_CutVar={}, int CutVar=-1, float dRminimum=0.4){
   vector <int> result={};
   for(unsigned int i = 0; i<recoObj_Eta.size(); i++){
-    double drmin = 0.4; 
+    // Default dRmin = 0.4
+    double drmin = dRminimum; 
     int idx = -1;
     for(unsigned int j = 0; j<L1Obj_eta.size(); j++){
       if(L1Obj_CutVar.size()==L1Obj_eta.size()){
@@ -401,12 +402,13 @@ float mll(ROOT::VecOps::RVec<float>l_pt, ROOT::VecOps::RVec<float>l_eta, ROOT::V
       lep2.SetPtEtaPhiE(l_pt[j], l_eta[j], l_phi[j], l_pt[j] * cosh(l_eta[j]));
 
       if(lep1.DeltaR(lep2) > 0.4){
-	mll = (lep1+lep2).Mag();
+	      mll = (lep1+lep2).Mag();
       }
     }
   }
   return mll;
 }
+
 
 vector<vector<vector<float>>> dR_mll(ROOT::VecOps::RVec<float>l_pt, ROOT::VecOps::RVec<float>l_eta, ROOT::VecOps::RVec<float>l_phi, ROOT::VecOps::RVec<bool>l_isTag, ROOT::VecOps::RVec<bool>l_isProbe){
   //float mll = -1.;

@@ -131,43 +131,65 @@ def main():
 
         print('Electron DQM Offline Hist production')
         print('---------------------------------')
-        df = h.DQMOff_EleSelection(df)
+        # df_prefvsmll = h.DQMOff_EleSelection(df, 40, 10000)
+        df = h.DQMOff_EleSelection(df, 60, 120)
 
         all_histos = {}        
+        # df_prefvsmll, histos_pref = h.PrefiringVsMll(df_prefvsmll)
         df, histos = h.ZEE_DQMOff_Plots(df, suffix = '')
+        
+
         for key, val in histos.items():
             all_histos[key] = val
 
         for i in all_histos:
             all_histos[i].GetValue().Write()
+        
+        # for i in histos_pref:
+        #     histos_pref[i].GetValue().Write()
 
     if args.channel == 'ZToMuMuDQMOff':
 
         print('Muon DQM Offline Hist production')
         print('---------------------------------')
-        df = h.DQMOff_MuSelection(df)
+        # df_prefvsmll = h.DQMOff_MuSelection(df, 40, 10000)
+        df = h.DQMOff_MuSelection(df, 60, 120)
 
         all_histos = {}        
+        # df_prefvsmll, histos_pref = h.PrefiringVsMll(df_prefvsmll)
         df, histos = h.ZMuMu_DQMOff_Plots(df, suffix = '')
+        
+
         for key, val in histos.items():
             all_histos[key] = val
 
         for i in all_histos:
             all_histos[i].GetValue().Write()
+
+        # for i in histos_pref:
+        #     histos_pref[i].GetValue().Write()
 
     if args.channel == 'ZToTauTauDQMOff':
 
         print('Tau DQM Offline Hist production')
         print('---------------------------------')
+
+        # df_prefvsmll = h.DQMOff_TauSelection(df)
         df = h.DQMOff_TauSelection(df)
 
         all_histos = {}
+        # df_prefvsmll, histos_pref = h.PrefiringVsMll(df_prefvsmll)
         df, histos = h.ZTauTau_DQMOff_Plots(df, suffix = '')
+        
+
         for key, val in histos.items():
             all_histos[key] = val
 
         for i in all_histos:
             all_histos[i].GetValue().Write()
+
+        # for i in histos_pref:
+        #     histos_pref[i].GetValue().Write()
 
     if args.channel == 'JetsDQMOff':
 

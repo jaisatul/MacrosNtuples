@@ -27,6 +27,7 @@ Thresholds: [7, 15, 22]
 # All the Turn On plots:
 L1TEfficiency: true
 L1TResolution: true
+Prefiring: true
 
 PU_plots:
     # Whether or not to compute the histograms for each bin of nvtx.
