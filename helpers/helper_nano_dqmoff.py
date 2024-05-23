@@ -4,7 +4,7 @@ import json
 from array import array
 from math import floor, ceil
 
-from bins import *
+from bins_dqmoff import *
 
 runnb_bins = None
 def set_runnb_bins(df):
@@ -156,7 +156,7 @@ def DQMOff_TauSelection(df):
     Selects Z->tautau events passing a single muon trigger. Defines probe tau pt/eta/phi
     The selections are made to match with DQM Off selections
     '''
-    df = df.Filter('HLT_IsoMu24||HLT_IsoMu27')
+    df = df.Filter('HLT_IsoMu24||HLT_IsoMu27','HLT_IsoMu24||HLT_IsoMu27')
 
     # Trigged on a Muon (probably redundant)
     df = df.Filter('''
@@ -165,7 +165,7 @@ def DQMOff_TauSelection(df):
         if(TrigObj_id[i] == 13) trigged_on_mu = true;
     }
     return trigged_on_mu;
-    ''')
+    ''','trigger on muon')
 
     # TrigObj matching
     df = df.Define('Muon_trig_idx', 'MatchObjToTrig(Muon_eta, Muon_phi, TrigObj_pt, TrigObj_eta, TrigObj_phi, TrigObj_id, 13, TrigObj_filterBits, 3, 0.6)')
@@ -173,11 +173,11 @@ def DQMOff_TauSelection(df):
 
     # Tag Muon Selection
     df = df.Define('Muon_PassTightId','Muon_pfIsoId>=3&&Muon_mediumPromptId') 
-    df = df.Define('Muon_MassId', 'pass_muon_met_mass_below30(Muon_pt, Muon_phi, PuppiMET_pt, PuppiMET_phi)')
+    df = df.Define('Muon_MassId', 'pass_muon_met_mass_belowX(Muon_pt, Muon_phi, PuppiMET_pt, PuppiMET_phi, 30)')
     df = df.Define('isTag','Muon_pt>24&&abs(Muon_eta)<2.1&&abs(Muon_pdgId)==13&&Muon_PassTightId&&Muon_passHLT_IsoMu24&&Muon_MassId')
-    df = df.Filter('Sum(isTag)==1')
+    df = df.Filter('Sum(isTag)==1', 'found a tag')
     df = df.Define('tagIdx', 'first_tagmuon_idx(isTag)')
-    df = df.Filter('tagIdx!=-1')
+    df = df.Filter('tagIdx!=-1','tagIdx!=-1')
 
     df = df.Define('tagPt', 'Muon_pt[tagIdx]')
     df = df.Define('tagEta', 'Muon_eta[tagIdx]')
@@ -192,7 +192,7 @@ def DQMOff_TauSelection(df):
     df = df.Define('Tau_PassTightId', 'Tau_idDeepTau2018v2p5VSe>=1&&Tau_idDeepTau2018v2p5VSjet>=2&&Tau_idDeepTau2018v2p5VSmu>=1')
     df = df.Define('Tau_PassProbe', 'pass_probeTau(Tau_pt, Tau_eta, Tau_phi, Tau_mass, Tau_charge, tagPt, tagEta, tagPhi, tagMass, tagCharge)')
     df = df.Define('isProbeTau', 'Tau_PassDecayMode&&Tau_PassTightId&&Tau_PassProbe')
-    df = df.Filter('Sum(isProbeTau)==1')
+    df = df.Filter('Sum(isProbeTau)==1','=1 probe tau')
 
     df = df.Define('probe_Pt','Tau_pt[isProbeTau]')
     df = df.Define('probe_Eta','Tau_eta[isProbeTau]')
@@ -1244,3 +1244,5 @@ def PrefiringVsMll(df):
     histos['mll_unpref_1stbx_endcapendcap'] =  df.Filter('(L1_FirstBunchInTrain)').Filter('endcapendcap').Histo1D(ROOT.RDF.TH1DModel('mll_unpref_1stbx_endcapendcap', '', len(ht_bins)-1, array('d',ht_bins) ), '_mll')
     histos['mll_unpref_1stbx_L1FinalORBXmin1_endcapendcap'] =  df.Filter('L1_FinalOR_BXmin1').Filter('(L1_FirstBunchInTrain)').Filter('endcapendcap').Histo1D(ROOT.RDF.TH1DModel('mll_unpref_1stbx_L1FinalORBXmin1_endcapendcap', '', len(ht_bins)-1, array('d',ht_bins) ), '_mll')
     
+
+

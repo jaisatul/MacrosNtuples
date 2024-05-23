@@ -16,12 +16,12 @@ do
                 ;;
 
             "2023C")
-                # a bit of globbing to take directories v11p9_v1-v1, v12_v2-v2 and v12_v4-v1, but not v12_v3-v1
+		# a bit of globbing to take directories v11p9_v1-v1, v12_v2-v2 and v12_v4-v1, but not v12_v3-v1
                 dir=/pnfs/iihe/cms/ph/sc4/store/data/Run$run/$1?/NANOAOD/PromptNanoAODv*_v[!3]*
                 golden='Cert_Collisions2023_eraC_367095_368224_Golden.json'
                 ;;
-
-            "2022Nano")
+	    
+           "2022Nano")
                 dir=/pnfs/iihe/cms/store/user/lathomas/$1/Run2022G-PromptReco-v1_NANOAODv11p9/230619_*/
                 golden='Cert_Collisions2022_355100_362760_Golden.json'
                 ;;
@@ -40,7 +40,8 @@ do
         echo $run $2
         
         sh SubmitToCondor_nano.sh outdir/"$run"/outputcondor_"$2" "$2" "$dir/*/*.root"
-        if  [ ! -z $golden ]
+        
+	if  [ ! -z $golden ]
         then 
             sh SubmitToCondor_nano.sh outdir/golden_"$run"/outputcondor_"$2" "$2" "$dir/*/*.root" $golden
         fi
