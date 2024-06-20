@@ -1,0 +1,20 @@
+# Files
+executable = scriptcondor_performances_nano_lxp.sh
+output = /afs/cern.ch/user/a/atjaiswa/L1TDQMCondorSetUp/CMSSW_13_0_3/src/MacrosNtuples/l1macros/condorsubmission/OUTPUTDIR/out/scriptcondor_$(Process).out
+error = /afs/cern.ch/user/a/atjaiswa/L1TDQMCondorSetUp/CMSSW_13_0_3/src/MacrosNtuples/l1macros/condorsubmission/OUTPUTDIR/err/scriptcondor_$(Process).err
+log = /afs/cern.ch/user/a/atjaiswa/L1TDQMCondorSetUp/CMSSW_13_0_3/src/MacrosNtuples/l1macros/condorsubmission/OUTPUTDIR/log/scriptcondor_$(Process).log
+
+#transfer_input_files = $(filename)
+arguments            = $(filename) /eos/cms/store/group/dpg_trigger/comm_trigger/L1Trigger/atjaiswa/condoroutput/OUTPUTDIR/output_$(Process).root CHANNEL GOLDENJSON
+
+requirements = (OpSysAndVer =?= "CentOS7")
+
+# File transfer behavior
+should_transfer_files = yes
+when_to_transfer_output = ON_EXIT
+
+
++JobFlavour = "longlunch"
+
+# Run job
+queue filename from FILENAMES
