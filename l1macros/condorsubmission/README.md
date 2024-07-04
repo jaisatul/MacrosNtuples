@@ -10,13 +10,13 @@
   ```
 - In your AFS area, Create a CMSSW environment and clone the Nanoworkflow and switch to branch dqmoff
   ```
-  	$ mkdir CondorTest
-	$ cmsrel CMSSW_14_1_0_pre4
-	$ cd CMSSW_14_1_0_pre4/src
-	$ cmsenv
-	$ git clone git@github.com:jaisatul/MacrosNtuples.git
-	$ cd MacroNTuples
-	$ git checkout -b dqmoff --track origin/dqmoff
+  $ mkdir CondorTest
+  $ cmsrel CMSSW_14_1_0_pre4
+  $ cd CMSSW_14_1_0_pre4/src
+  $ cmsenv
+  $ git clone git@github.com:jaisatul/MacrosNtuples.git
+  $ cd MacroNTuples
+  $ git checkout -b dqmoff --track origin/dqmoff
   ```
 - Go to condorsubmission directory
   ```
@@ -31,13 +31,13 @@
 - In SubmitToCondor_nano_lxp.sh, replace the output path of EOS
 - Run Command to submit jobs for preparing the prefiring histos
   ```
-	sh SubmitToCondor_nano_lxp.sh <DirName> <Channel> ../<logFileName>.log
+  $ sh SubmitToCondor_nano_lxp.sh <DirName> <Channel> ../<logFileName>.log
   ```
 	e.g.
   ```
-	$ sh SubmitToCondor_nano_lxp.sh jetmet_2024Ev1 DiJet ../jetmet_2024Ev1.log
-  	$ sh SubmitToCondor_nano_lxp.sh muon_2024Ev1 ZToMuMu ../muon_2024Ev1.log
-  	$ sh SubmitToCondor_nano_lxp.sh egamma_2024Ev1 ZToEE ../egamma_2024Ev1.log
+  $ sh SubmitToCondor_nano_lxp.sh jetmet_2024Ev1 DiJet ../jetmet_2024Ev1.log
+  $ sh SubmitToCondor_nano_lxp.sh muon_2024Ev1 ZToMuMu ../muon_2024Ev1.log
+  $ sh SubmitToCondor_nano_lxp.sh egamma_2024Ev1 ZToEE ../egamma_2024Ev1.log
   ```
 
 - NOTE:
