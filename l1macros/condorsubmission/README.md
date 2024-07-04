@@ -24,9 +24,9 @@
   ```
 - Prepare a log file for JetMET, EGamma and Muon Datsets. A sample log file is present here MacrosNtuples/l1macros/condorsubmission/templatelogfile.log
 - In scriptcondor_performances_nano_template_lxp.sub, replace the AFS area and eos area location
-	NOTE: 
-		The .log, .out and .err should be written in afs area
-		The output of jobs can be wriiten to AFS or EOS area. In this example, EOS is used.
+- NOTE:
+	- The .log, .out and .err should be written in afs area
+	- The output of jobs can be wriiten to AFS or EOS area. In this example, EOS is used.
 - In scriptcondor_performances_nano_lxp.sh, replace the proxy path and AFS area of workflow
 - In SubmitToCondor_nano_lxp.sh, replace the output path of EOS
 - Run Command to submit jobs for preparing the prefiring histos
@@ -36,8 +36,8 @@
 	e.g.
   ```
 	$ sh SubmitToCondor_nano_lxp.sh jetmet_2024Ev1 DiJet ../jetmet_2024Ev1.log
-        $ sh SubmitToCondor_nano_lxp.sh muon_2024Ev1 ZToMuMu ../muon_2024Ev1.log
-	$ sh SubmitToCondor_nano_lxp.sh egamma_2024Ev1 ZToEE ../egamma_2024Ev1.log
+  	$ sh SubmitToCondor_nano_lxp.sh muon_2024Ev1 ZToMuMu ../muon_2024Ev1.log
+  	$ sh SubmitToCondor_nano_lxp.sh egamma_2024Ev1 ZToEE ../egamma_2024Ev1.log
   ```
 
 - NOTE:
