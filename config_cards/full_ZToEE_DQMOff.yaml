@@ -30,7 +30,7 @@ Thresholds: [34, 36, 38, 40, 42, 48, 50]
 L1TEfficiency: true
 L1TResolution: true
 
-Prefiring: true
+Prefiring: false
 
 PU_plots:
     # Whether or not to compute the histograms for each bin of nvtx.

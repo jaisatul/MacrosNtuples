@@ -4,9 +4,9 @@ Qualities:
     # label is the string inserted in histogram and plot names
     # cut is the value of the cut to apply.
     # To select all the qualities, set the cut to -1.
-    AllQual: -1
-    Qual8:  8
-    Qual12: 12
+    qualAll: -1
+    qualDouble:  8
+    qualSingle: 12
 RecoToL1PtCutFactor: 1.2
 ### The different of regions of eta
 Regions:
@@ -28,7 +28,8 @@ Thresholds: [7, 15, 22]
 L1TEfficiency: true
 L1TResolution: true
 
-Prefiring: true
+Prefiring: false
+ControlVariables: true
 
 
 PU_plots:
