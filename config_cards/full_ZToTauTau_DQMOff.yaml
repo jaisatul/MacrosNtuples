@@ -27,7 +27,7 @@ Thresholds: [28, 30, 32, 128, 176]
 L1TEfficiency: true
 L1TResolution: true
 
-Prefiring: true
+Prefiring: false
 
 
 PU_plots:

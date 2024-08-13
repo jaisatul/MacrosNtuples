@@ -36,6 +36,10 @@ dqmoff_muonresolution_pt_bins = array('f', [-2.0 + i * 0.08 for i in range(51)])
 dqmoff_muonresolution_eta_bins = array('f', [-0.1 + i * 0.002 for i in range(101)])
 dqmoff_muonresolution_phi_bins = array('f', [-0.2 + i * 0.0041666 for i in range(97)])
 
+dqmoff_controlhist_muonpt_bins = array('f', [0.0 + i * 2.0 for i in range(51)])
+dqmoff_controlhist_muoneta_bins = array('f', [-2.5 + i * 0.1 for i in range(51)])
+dqmoff_controlhist_muonphi_bins = array('f', [-3.3 + i * 0.1 for i in range(67)])
+
 # bins used for dqm offline tau plots -----------
 dqmoff_taupt_bins = list( 
     itertools.chain(

@@ -27,6 +27,7 @@ def main():
     parser.add_argument("-i", "--input", dest="inputFile", help="Input file", type=str, default='')
     parser.add_argument("-o", "--output", dest="outputFile", help="Output file", type=str, default='')
     parser.add_argument("-g", "--golden", dest="golden", help="Golden JSON file to use", type = str, default = '')
+    parser.add_argument("--run", dest="run", help="Run number", type = str, default = '')
     parser.add_argument("-c", "--channel", dest="channel", help=
                         '''Set channel and analysis:
                         -ZToMuMuDQMOff: For Offline DQM L1 muon studies with Z->mumu
@@ -41,6 +42,7 @@ def main():
     args = parser.parse_args() 
 
     ###Define the RDataFrame from the input tree
+    run = args.run
     inputFile = args.inputFile
     if inputFile == '':
         if args.channel == 'ZToEEDQMOff':
@@ -138,15 +140,22 @@ def main():
         # df_prefvsmll, histos_pref = h.PrefiringVsMll(df_prefvsmll)
         df, histos = h.ZEE_DQMOff_Plots(df, suffix = '')
         
-
         for key, val in histos.items():
             all_histos[key] = val
 
-        for i in all_histos:
-            all_histos[i].GetValue().Write()
-        
-        # for i in histos_pref:
-        #     histos_pref[i].GetValue().Write()
+        direc0 = "DQMData/Run {}/L1T/Run summary/L1TObjects/L1TEGamma/L1TriggerVsReco/".format(run)
+        direc1 = "DQMData/Run {}/L1T/Run summary/L1TObjects/L1TEGamma/L1TriggerVsReco/efficiency_raw/".format(run)
+
+        if not out.GetDirectory(direc0): out.mkdir(direc0)
+        if not out.GetDirectory(direc1): out.mkdir(direc1)
+        dir0 = out.GetDirectory(direc0)
+        dir1 = out.GetDirectory(direc1)
+
+        for key in all_histos:
+            if (key[0:3] == 'res'): out.cd(direc0)
+            elif (key[0:3] == 'eff'): out.cd(direc1)
+
+            all_histos[key].Write()
 
     if args.channel == 'ZToMuMuDQMOff':
 
@@ -159,15 +168,33 @@ def main():
         # df_prefvsmll, histos_pref = h.PrefiringVsMll(df_prefvsmll)
         df, histos = h.ZMuMu_DQMOff_Plots(df, suffix = '')
         
-
         for key, val in histos.items():
             all_histos[key] = val
 
-        for i in all_histos:
-            all_histos[i].GetValue().Write()
+        direc0 = "DQMData/Run {}/L1T/Run summary/L1TObjects/L1TMuon/L1TriggerVsReco/".format(run)
+        direc1 = "DQMData/Run {}/L1T/Run summary/L1TObjects/L1TMuon/L1TriggerVsReco/control_variables/".format(run)
+        direc2 = "DQMData/Run {}/L1T/Run summary/L1TObjects/L1TMuon/L1TriggerVsReco/numerators_and_denominators/".format(run)
+        direc3 = "DQMData/Run {}/L1T/Run summary/L1TObjects/L1TMuon/L1TriggerVsReco/resolution/".format(run)
+        direc4 = "DQMData/Run {}/L1T/Run summary/L1TObjects/L1TMuon/L1TriggerVsReco/prefiring/".format(run)
 
-        # for i in histos_pref:
-        #     histos_pref[i].GetValue().Write()
+        if not out.GetDirectory(direc0): out.mkdir(direc0)
+        if not out.GetDirectory(direc1): out.mkdir(direc1)
+        if not out.GetDirectory(direc2): out.mkdir(direc2)
+        if not out.GetDirectory(direc3): out.mkdir(direc3)
+        if not out.GetDirectory(direc4): out.mkdir(direc4)
+        dir0 = out.GetDirectory(direc0)
+        dir1 = out.GetDirectory(direc1)
+        dir2 = out.GetDirectory(direc2)
+        dir3 = out.GetDirectory(direc3)
+        dir4 = out.GetDirectory(direc4)
+
+        for key in all_histos:
+            if (key[0:3] == 'con'): out.cd(direc1)
+            elif (key[0:3] == 'eff'): out.cd(direc2)
+            elif (key[0:3] == 'res'): out.cd(direc3)
+            elif (key[0:3] == 'pre'): out.cd(direc4)
+
+            all_histos[key].Write()
 
     if args.channel == 'ZToTauTauDQMOff':
 
@@ -185,12 +212,20 @@ def main():
         for key, val in histos.items():
             all_histos[key] = val
 
-        for i in all_histos:
-            all_histos[i].GetValue().Write()
+        direc0 = "DQMData/Run {}/L1T/Run summary/L1TObjects/L1TTau/L1TriggerVsReco/".format(run)
+        direc1 = "DQMData/Run {}/L1T/Run summary/L1TObjects/L1TTau/L1TriggerVsReco/efficiency_raw/".format(run)
 
-        # for i in histos_pref:
-        #     histos_pref[i].GetValue().Write()
+        if not out.GetDirectory(direc0): out.mkdir(direc0)
+        if not out.GetDirectory(direc1): out.mkdir(direc1)
+        dir0 = out.GetDirectory(direc0)
+        dir1 = out.GetDirectory(direc1)
 
+        for key in all_histos:
+            if (key[0:3] == 'res'): out.cd(direc0)
+            elif (key[0:3] == 'eff'): out.cd(direc1)
+
+            all_histos[key].Write()
+            
         
     if args.channel == 'JetsDQMOff':
 
@@ -203,8 +238,20 @@ def main():
         for key, val in histos.items():
             all_histos[key] = val
 
-        for i in all_histos:
-            all_histos[i].GetValue().Write()
+        direc0 = "DQMData/Run {}/L1T/Run summary/L1TObjects/L1TJet/L1TriggerVsReco/".format(run)
+        direc1 = "DQMData/Run {}/L1T/Run summary/L1TObjects/L1TJet/L1TriggerVsReco/efficiency_raw/".format(run)
+
+        if not out.GetDirectory(direc0): out.mkdir(direc0)
+        if not out.GetDirectory(direc1): out.mkdir(direc1)
+        dir0 = out.GetDirectory(direc0)
+        dir1 = out.GetDirectory(direc1)
+
+        for key in all_histos:
+            if (key[0:3] == 'res'): out.cd(direc0)
+            elif (key[0:3] == 'eff'): out.cd(direc1)
+
+            all_histos[key].Write()
+
 
     if args.channel == 'EtSumDQMOff':
 
@@ -217,8 +264,19 @@ def main():
         for key, val in histos.items():
             all_histos[key] = val
 
-        for i in all_histos:
-            all_histos[i].GetValue().Write()
+        direc0 = "DQMData/Run {}/L1T/Run summary/L1TObjects/L1TEtSum/L1TriggerVsReco/".format(run)
+        direc1 = "DQMData/Run {}/L1T/Run summary/L1TObjects/L1TEtSum/L1TriggerVsReco/efficiency_raw/".format(run)
+
+        if not out.GetDirectory(direc0): out.mkdir(direc0)
+        if not out.GetDirectory(direc1): out.mkdir(direc1)
+        dir0 = out.GetDirectory(direc0)
+        dir1 = out.GetDirectory(direc1)
+
+        for key in all_histos:
+            if (key[0:3] == 'res'): out.cd(direc0)
+            elif (key[0:3] == 'eff'): out.cd(direc1)
+
+            all_histos[key].Write()
 
 if __name__ == '__main__':
     main()
