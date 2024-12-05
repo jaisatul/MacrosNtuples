@@ -16,16 +16,17 @@ def main():
     parser.add_argument("-d", "--dir", dest="dir", help="The directory to read the inputs files from and draw the plots to", type=str, default='./')
     parser.add_argument("-c", "--config", dest="config", help="The YAML config to read from", type=str, default='../config_cards/full_ZToEE.yaml')
     parser.add_argument("-l", "--lumi", dest="lumi", help="The integrated luminosity to display in the top right corner of the plot", type=str, default='')
+    parser.add_argument("-e", "--era", dest="era", help="Label to mark the era", type=str, default='')
 
     args = parser.parse_args()
     config = yaml.safe_load(open(args.config, 'r'))
 
-    input_file = args.dir + "/all_ZToEE.root"
-    if args.lumi != '':
-        toplabel="#sqrt{s} = 13.6 TeV, L_{int} = " + args.lumi #+ " fb^{-1}"
-    else:
-        toplabel="#sqrt{s} = 13.6 TeV"
-
+    input_file = args.dir + "/all_ZToEE_" +  args.era + ".root"
+    # if args.lumi != '':
+    #     toplabel="#sqrt{s} = 13.6 TeV, L_{int} = " + args.lumi #+ " fb^{-1}"
+    # else:
+    #     toplabel="#sqrt{s} = 13.6 TeV"
+    toplabel= "#sqrt{s} = 13.6 TeV, " +  args.lumi
     suffixes = ['']
     if config['PU_plots']['make_histos']:
         bins = config['PU_plots']['nvtx_bins']
