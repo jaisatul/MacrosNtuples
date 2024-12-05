@@ -22,7 +22,11 @@
   ```
   $ cd l1macros/condorsubmission
   ```
-- Prepare a log file for JetMET, EGamma and Muon Datsets. A sample log file is present here MacrosNtuples/l1macros/condorsubmission/templatelogfile.log
+- Prepare a log file for JetMET, EGamma and Muon Datsets. A sample log file is present here MacrosNtuples/l1macros/condorsubmission/templatelogfile.log. e.g.
+  ```
+  $ dasgoclient -query="file dataset=/JetMET0/Run2024F-PromptReco-v1/NANOAOD" > jetmet_2024F_promptreco_v1_nano.log
+  $ dasgoclient -query="file dataset=/JetMET1/Run2024F-PromptReco-v1/NANOAOD" >> jetmet_2024F_promptreco_v1_nano.log
+  ```
 - In scriptcondor_performances_nano_template_lxp.sub, replace the AFS area and eos area location
 - NOTE:
 	- The .log, .out and .err should be written in afs area
